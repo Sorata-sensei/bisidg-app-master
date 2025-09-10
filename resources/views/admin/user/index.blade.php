@@ -50,11 +50,11 @@
                             style="max-height: 120px;">
                     @endif
                     <div class="alert alert-warning" role="alert">
-                        Mohon pastikan TTD tidak ada background nya atau bisa gunakan <a
-                            href="https://www.photoroom.com/tools/background-remover" class="">ini</a>
-                        untuk
-                        menghilangkan background sebelum menggunggah
+                        <strong>Perhatian!</strong> Pastikan tanda tangan yang Anda unggah tidak memiliki latar belakang.
+                        Jika masih ada background, Anda dapat menghapusnya terlebih dahulu menggunakan
+                        <a href="https://www.photoroom.com/tools/background-remover" target="_blank">alat ini</a>.
                     </div>
+
                 </div>
             </div>
             <div class="mb-3 row">
