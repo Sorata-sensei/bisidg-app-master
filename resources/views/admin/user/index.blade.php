@@ -52,7 +52,7 @@
                     <div class="alert alert-warning" role="alert">
                         <strong>Perhatian!</strong> Pastikan tanda tangan yang Anda unggah tidak memiliki latar belakang.
                         Jika masih ada background, Anda dapat menghapusnya terlebih dahulu menggunakan
-                        <a href="https://www.photoroom.com/tools/background-remover" target="_blank">alat ini</a>.
+                        <a href="https://www.photoroom.com/tools/background-remover" target="_blank">Background Remover</a>.
                     </div>
 
                 </div>
