@@ -84,7 +84,21 @@
                                 @else
                                     <input type="file" name="ttd" id="ttd" class="form-control form-control-lg"
                                         accept="image/*">
+                                    <div class="alert alert-warning d-flex align-items-center mb-3" role="alert">
+                                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                        <div>
+                                            <span class="fw-bold">Perhatian:</span>
+                                            <span class="text-dark">Unggah tanda tangan digital dengan latar belakang
+                                                transparan.
+                                                Jika tanda tangan masih memiliki latar belakang, silakan bersihkan terlebih
+                                                dahulu menggunakan
+                                                <a href="https://www.photoroom.com/tools/background-remover" target="_blank"
+                                                    class="fw-semibold text-decoration-underline">alat penghapus latar
+                                                    belakang</a>.</span>
+                                        </div>
+                                    </div>
                                 @endif
+
                             </div>
 
                             {{-- Nama Lengkap --}}
