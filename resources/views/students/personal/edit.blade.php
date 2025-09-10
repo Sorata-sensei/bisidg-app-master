@@ -84,7 +84,7 @@
                                 @else
                                     <input type="file" name="ttd" id="ttd" class="form-control form-control-lg"
                                         accept="image/*">
-                                    <div class="alert alert-warning d-flex align-items-center mb-3" role="alert">
+                                    <div class="alert alert-warning d-flex align-items-center mt-3" role="alert">
                                         <i class="bi bi-exclamation-triangle-fill me-2"></i>
                                         <div>
                                             <span class="fw-bold">Perhatian:</span>

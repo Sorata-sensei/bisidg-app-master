@@ -49,7 +49,7 @@
                         <img src="{{ asset('storage/' . $user->ttd) }}" alt="ttd {{ $user->name }}" class="img-thumbnail"
                             style="max-height: 120px;">
                     @endif
-                    <div class="alert alert-warning d-flex align-items-center mb-3" role="alert">
+                    <div class="alert alert-warning d-flex align-items-center mt-3" role="alert">
                         <i class="bi bi-exclamation-triangle-fill me-2"></i>
                         <div>
                             <span class="fw-bold">Perhatian:</span>
