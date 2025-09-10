@@ -27,7 +27,7 @@ return new class extends Migration
             $table->text('alamat')->nullable(); // Alamat lengkap
             $table->string('no_telepon', 15)->nullable(); // Nomor telepon (dengan kode area)
             $table->string('email', 100)->nullable(); // Email (bisa unik)
-            $table->enum('status_mahasiswa', ['Aktif', 'Cuti', 'Lulus', 'Mengundurkan Diri'])->default('Aktif');
+            $table->enum('status_mahasiswa', ['Aktif', 'Cuti', 'Lulus', 'Mengundurkan Diri'])->default('Aktif');// prodi yang punya wewenang
             $table->date('tanggal_masuk'); // Tanggal resmi masuk kuliah
             $table->date('tanggal_lulus')->nullable(); // Bisa NULL jika belum lulus
             $table->integer('is_counseling')->default(0); // 0 = Belum, 1 = Sudah
