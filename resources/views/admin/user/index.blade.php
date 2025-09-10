@@ -49,9 +49,11 @@
                         <img src="{{ asset('storage/' . $user->ttd) }}" alt="ttd {{ $user->name }}" class="img-thumbnail"
                             style="max-height: 120px;">
                     @endif
-                    <p class="text-white btn-danger">Mohon pastikan TTD tidak ada background nya atau bisa gunakan ini untuk
+                    <p class="text-white btn btn-danger">Mohon pastikan TTD tidak ada background nya atau bisa gunakan ini
+                        untuk
                         menghilangkan background sebelum menggunggah <a
-                            href="https://www.photoroom.com/tools/background-remover">Background Remover</a></p>
+                            href="https://www.photoroom.com/tools/background-remover" class="text-primary">Background
+                            Remover</a></p>
                 </div>
             </div>
             <div class="mb-3 row">
