@@ -50,12 +50,10 @@
                             style="max-height: 120px;">
                     @endif
                     <div class="alert alert-warning" role="alert">
-                        Mohon pastikan TTD tidak ada background nya atau bisa gunakan ini
+                        Mohon pastikan TTD tidak ada background nya atau bisa gunakan <a
+                            href="https://www.photoroom.com/tools/background-remover" class="">ini</a>
                         untuk
-                        menghilangkan background sebelum menggunggah <a
-                            href="https://www.photoroom.com/tools/background-remover"
-                            class="btn btn-outline-primary">Background
-                            Remover</a>
+                        menghilangkan background sebelum menggunggah
                     </div>
                 </div>
             </div>
