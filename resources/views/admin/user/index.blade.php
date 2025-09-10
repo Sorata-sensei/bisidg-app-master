@@ -52,7 +52,8 @@
                     <p class="text-white btn btn-danger">Mohon pastikan TTD tidak ada background nya atau bisa gunakan ini
                         untuk
                         menghilangkan background sebelum menggunggah <a
-                            href="https://www.photoroom.com/tools/background-remover" class="text-primary">Background
+                            href="https://www.photoroom.com/tools/background-remover"
+                            class="btn btn-outline-primary">Background
                             Remover</a></p>
                 </div>
             </div>
