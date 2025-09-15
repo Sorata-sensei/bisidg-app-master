@@ -13,19 +13,20 @@ class StudentsController extends Controller
      */
     public function index(Request $request)
         {
-            $counseling = CardCounseling::where('id_student',session('student_id'))->count();
+            
+            $counseling = CardCounseling::where('id_student',decrypt(session('student_id')))->count();
             return view('students.dashboard.index',compact('counseling'));
         }
     
-    public function editDataIndex(Request $request, $id)
+    public function editDataIndex(Request $request)
     {
-         $student = Student::with('dosenPA')->findOrFail($id);
+         $student = Student::with('dosenPA')->findOrFail(decrypt(session('student_id')));
          return view('students.personal.edit', compact('student'));
     }
 
-    public function updateData(Request $request, $id)
+    public function updateData(Request $request)
 {
-    $student = Student::findOrFail($id);
+    $student = Student::findOrFail(decrypt(session('student_id')));
 
     $request->validate([
         'nama_orangtua' => 'nullable|string|max:255',

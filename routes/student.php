@@ -16,8 +16,8 @@ Route::middleware(['student'])->group(function () {
     });
    Route::prefix('student/personal')->name('student.personal.')->group(function () {
         Route::get('/', [StudentsController::class, 'index'])->name('index');
-       Route::get('/{id}/edit', [StudentsController::class, 'editDataIndex'])->name('editDataIndex');
-       Route::put('/{id}', [StudentsController::class, 'updateData'])->name('updateData');
+        Route::get('/{id}/edit', [StudentsController::class, 'editDataIndex'])->name('editDataIndex');
+        Route::put('/{id}', [StudentsController::class, 'updateData'])->name('updateData');
     });
     
 });  

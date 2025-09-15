@@ -55,7 +55,7 @@ class AuthController extends Controller
         }
 
         // Opsi sederhana: simpan session mahasiswa_id
-        $request->session()->put('student_id', $mahasiswa->id);
+       $request->session()->put('student_id', encrypt($mahasiswa->id));
         // (opsional) simpan juga nama atau role
         $request->session()->put('student_nama', $mahasiswa->nama_lengkap ?? null);
         $request->session()->put('nim', $mahasiswa->nim ?? null);

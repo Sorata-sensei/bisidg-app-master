@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->unsignedSmallInteger('sks');
             $table->decimal('ip', 3, 2)->nullable();
             $table->date('tanggal');
-            $table->text('matkul_tidak_lulus')->nullable();
+            $table->text('failed_courses')->nullable();
             $table->text('komentar')->nullable();
 
             $table->timestamps();

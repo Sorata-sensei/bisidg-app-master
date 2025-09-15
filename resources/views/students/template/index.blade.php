@@ -19,7 +19,7 @@
                 <div class="dropdown">
                     <a class="btn  dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                         aria-expanded="false">
-                        {{ session('student_nama') }}
+                        {{ collect(explode(' ', session('student_nama')))->map(fn($word) => strtoupper(substr($word, 0, 1)))->join('') }}
                     </a>
 
                     <ul class="dropdown-menu">
