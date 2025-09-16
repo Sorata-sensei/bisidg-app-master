@@ -25,9 +25,9 @@
 
                                 </div>
                                 <div class="col-auto">
-                                    <img src="{{ asset('storage/' . $user->photo) }}" alt="Photo Lecturer"
-                                        class="img-fluid rounded-circle"
-                                        style="max-height: 50px; max-width: 50px;  object-fit: cover; object-position: center;">
+                                    <div class="photo-wrapper">
+                                        <img src="{{ asset('storage/' . $user->photo) }}" alt="Photo Lecturer">
+                                    </div>
                                 </div>
                             </div>
                         </div>

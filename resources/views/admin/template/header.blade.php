@@ -29,6 +29,27 @@
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     @stack('css')
     <style>
+        .photo-wrapper {
+
+            /* pastikan sama dengan width */
+            border-radius: 50%;
+            /* bikin bulat */
+            overflow: hidden;
+            /* potong bagian luar */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f0f0f0;
+            /* warna background fallback */
+        }
+
+        .photo-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* biar proporsional */
+        }
+
         * {
             margin: 0;
             padding: 0;
