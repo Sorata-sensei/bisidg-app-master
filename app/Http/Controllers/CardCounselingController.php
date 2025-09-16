@@ -50,37 +50,42 @@ class CardCounselingController extends Controller
 
     
 
-     public function store(Request $request, $id_student)
+    public function store(Request $request, $id_student)
 {
     $student = Student::findOrFail(decrypt(session('student_id')));
 
-  $request->validate([
-        'semester'        => 'required|numeric',
-        'sks'             => 'required|numeric',
-        'ip' => 'nullable|numeric|between:0,999.99',
-        'tanggal'         => 'required|date',
-        'komentar'        => 'nullable|string',
-        'failed_courses'  => 'nullable|array', // validasi harus array
-        'failed_courses.*'=> 'string', // setiap item berupa string
+    $request->validate([
+        'semester'          => 'required|numeric',
+        'sks'               => 'required|numeric',
+        'ip'                => 'nullable|numeric|between:0,999.99',
+        'tanggal'           => 'required|date',
+        'komentar'          => 'nullable|string',
+        'failed_courses'    => 'nullable|array',   // validasi harus array
+        'failed_courses.*'  => 'string',           // setiap item berupa string
+        'retaken_courses'   => 'nullable|array',   // validasi juga array
+        'retaken_courses.*' => 'string',           // tiap item string juga
     ]);
 
     $student->is_counseling = '0'; 
     $student->save();
 
     CardCounseling::create([
-        'id_student'     => $id_student,
-        'semester'       => $request->semester,
-        'sks'            => $request->sks,
-        'ip'             => $request->ip,
-        'tanggal'        => $request->tanggal,
-        'komentar'       => $request->komentar,
-        'failed_courses' => $request->failed_courses ? json_encode($request->failed_courses) : null,
+        'id_student'      => $id_student,
+        'semester'        => $request->semester,
+        'sks'             => $request->sks,
+        'ip'              => $request->ip,
+        'tanggal'         => $request->tanggal,
+        'komentar'        => $request->komentar,
+        'failed_courses'  => $request->failed_courses,   // langsung array
+        'retaken_courses' => $request->retaken_courses,  // langsung array
     ]);
+
 
     return redirect()
         ->route('student.counseling.show', encrypt(session('student_id')))
         ->with('success', 'Data konsultasi berhasil ditambahkan');
 }
+
 
 
 }

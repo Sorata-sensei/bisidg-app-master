@@ -12,12 +12,12 @@ return new class extends Migration {
             $table->foreignId('id_student')   // kolom foreign key
                   ->constrained('students', 'id')
                   ->onDelete('cascade');
-
             $table->unsignedTinyInteger('semester');
             $table->unsignedSmallInteger('sks');
             $table->decimal('ip', 3, 2)->nullable();
             $table->date('tanggal');
             $table->text('failed_courses')->nullable();
+            $table->text('retaken_courses')->nullable();
             $table->text('komentar')->nullable();
 
             $table->timestamps();

@@ -203,18 +203,17 @@
                             @endif
                         </p>
 
-                        {{-- <div class="d-flex justify-content-end mt-3">
-                            <div class="text-center">
-                                <small class="d-block text-muted">Mahasiswa</small>
-                                <img src="{{ asset('storage/' . $student->ttd) }}" alt="TTD Mahasiswa"
-                                    style="max-height: 30px;">
-                            </div>
-                            <div class="text-center">
-                                <small class="d-block text-muted">Dosen</small>
-                                <img src="{{ asset('storage/' . $student->dosenPA->ttd) }}" alt="TTD Dosen"
-                                    style="max-height: 30px;">
-                            </div>
-                        </div> --}}
+                        <p class="mb-1"><strong>Mata Kuliah yang sudah Diulang:</strong><br>
+                            @if ($row->retaken_courses_objects->count())
+                                @foreach ($row->retaken_courses_objects as $rc)
+                                    <span class="badge bg-warning text-dark mb-1">
+                                        {{ $rc->code_prefix }}{{ $rc->code_number }} - {{ $rc->name }}
+                                    </span>
+                                @endforeach
+                            @else
+                                <span class="text-muted">Tidak Ada</span>
+                            @endif
+                        </p>
                     </div>
                 @else
                     <div class="alert alert-warning">Belum ada riwayat konsultasi</div>
@@ -265,6 +264,19 @@
                                     <small class="text-muted">Bisa pilih lebih dari 1, jika tidak ada abaikan saja</small>
                                 </div>
 
+                                <div class="col-12">
+                                    <label class="form-label">Mata Kuliah yang sudah Diulang</label>
+                                    <select name="retaken_courses[]" id="retakenCoursesSelect" class="form-select" multiple>
+                                        @foreach ($courses as $course)
+                                            <option value="{{ $course->id }}">
+                                                {{ $course->code_prefix }}{{ $course->code_number }} -
+                                                {{ $course->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <small class="text-muted">Bisa pilih lebih dari 1, jika tidak ada abaikan saja</small>
+                                </div>
+
                                 <div class="col-12 text-end">
                                     <button type="submit" class="btn btn-primary">Simpan</button>
                                 </div>
@@ -278,15 +290,6 @@
                     <b>Layanan bimbingan akademik belum dibuka atau sudah ditutup.</b>
                 </div>
             @endif
-
-            {{-- 
-            <div class="mt-4">
-                <small>
-                    <strong>NB:</strong><br>
-                    1. Pertemuan konsultasi minimal 4 kali per semester.<br>
-                    2. Kartu bimbingan ini dipegang oleh Dosen PA dan Mahasiswa.
-                </small>
-            </div> --}}
         </div>
     </div>
 @endsection
@@ -298,6 +301,11 @@
         $(document).ready(function() {
             $('#failedCoursesSelect').select2({
                 placeholder: "Pilih mata kuliah gagal",
+                width: '100%'
+            });
+
+            $('#retakenCoursesSelect').select2({
+                placeholder: "Pilih mata kuliah diulang",
                 width: '100%'
             });
         });

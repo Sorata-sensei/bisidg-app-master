@@ -21,7 +21,7 @@
               </li>
               <li class="nav-item">
                   <a href="{{ route('student.counseling.show', session('student_id')) }}"
-                      class="nav-link {{ request()->is('admin/counseling') ? 'active' : '' }}">
+                      class="nav-link {{ request()->is('student/counseling/' . session('student_id')) ? 'active' : '' }}">
                       <span class="nav-icon">📚</span>
                       Counseling
                   </a>

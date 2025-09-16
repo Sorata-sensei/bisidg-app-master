@@ -17,8 +17,9 @@
 
 
                     @if (!empty(auth()->user()->photo))
-                        <img src="{{ asset('storage/' . auth()->user()->photo) }}" alt="Photo Student"
-                            class="img-fluid rounded-circle">
+                        <div class="photo-wrapper">
+                            <img src="{{ asset('storage/' . auth()->user()->photo) }}" alt="Photo Student">
+                        </div>
                     @else
                         {{ collect(explode(' ', auth()->user()->name))->map(fn($word) => strtoupper(substr($word, 0, 1)))->join('') }}
                     @endif

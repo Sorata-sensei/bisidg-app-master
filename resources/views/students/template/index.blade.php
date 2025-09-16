@@ -14,8 +14,9 @@
             <div class="user-profile">
                 <div class="profile-img" style=" object-fit: cover; object-position: center;">
                     @if (session('path_pic') !== 0)
-                        <img src="{{ asset('storage/' . session('path_pic')) }}" alt="Photo Student"
-                            class="img-fluid rounded-circle">
+                        <div class="photo-wrapper">
+                            <img src="{{ asset('storage/' . session('path_pic')) }}" alt="Photo Student">
+                        </div>
                     @else
                         {{ collect(explode(' ', session('student_nama')))->map(fn($word) => strtoupper(substr($word, 0, 1)))->join('') }}
                     @endif
