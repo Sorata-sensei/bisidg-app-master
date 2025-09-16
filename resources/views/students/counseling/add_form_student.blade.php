@@ -176,7 +176,7 @@
 
                 @if ($history->isNotEmpty())
                     @php $row = $history->first(); @endphp
-                    <div class="border-3 rounded p-3 bg-light small">
+                    <div class=" card border-3 rounded p-3 bg-light small">
                         <div class="d-flex justify-content-between mb-2">
                             <span class="badge bg-primary"># Terbaru</span>
                             <small class="text-muted"><b>{{ \Carbon\Carbon::parse($row['tanggal'])->translatedFormat('l, d F Y') }}
