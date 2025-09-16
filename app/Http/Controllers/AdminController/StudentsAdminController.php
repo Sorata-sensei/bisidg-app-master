@@ -9,7 +9,8 @@ use Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-use App\MOdels\CardCounseling;
+use App\Models\CardCounseling;
+use App\Models\Course;
 class StudentsAdminController extends Controller
 {
     /**
@@ -42,7 +43,14 @@ class StudentsAdminController extends Controller
     $student = Student::with(['dosenPA', 'counselings'])->findOrFail($student_id);
 
     // Ambil semua riwayat counseling, urutkan biar rapih
-    $history = $student->counselings()->orderBy('created_at', 'asc')->get();
+   $history = $student->counselings()->orderBy('created_at', 'asc')->get()->map(function ($item) {
+        $ids = is_array($item->failed_courses)
+            ? $item->failed_courses
+            : json_decode($item->failed_courses, true);
+
+        $item->failed_courses_objects = Course::whereIn('id', $ids ?: [])->get();
+        return $item;
+    });
 
     // Tampilkan form tambah counseling + riwayat
     return view('admin.counseling.add_form_student', compact('student', 'history'));

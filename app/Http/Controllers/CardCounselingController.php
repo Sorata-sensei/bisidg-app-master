@@ -23,8 +23,8 @@ class CardCounselingController extends Controller
     }
 
   $history = $student->counselings()
-    ->orderBy('created_at')
-    ->take(3)
+    ->orderBy('created_at','desc')
+    ->take(1)
     ->get()
     ->map(function ($item) {
         $ids = is_array($item->failed_courses)

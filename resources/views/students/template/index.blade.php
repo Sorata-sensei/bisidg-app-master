@@ -9,11 +9,17 @@
     <main class="main-content">
         <header class="header">
             <div>
-                <h2>Selamat {{ $greeting }}</h2>
+                <h2>Selamat {{ $greeting }} {{ session('student_nama') }}</h2>
             </div>
             <div class="user-profile">
-                <div class="profile-img">
-                    {{ collect(explode(' ', session('student_nama')))->map(fn($word) => strtoupper(substr($word, 0, 1)))->join('') }}
+                <div class="profile-img" style=" object-fit: cover; object-position: center;">
+                    @if (session('path_pic') !== 0)
+                        <img src="{{ asset('storage/' . session('path_pic')) }}" alt="Photo Student"
+                            class="img-fluid rounded-circle">
+                    @else
+                        {{ collect(explode(' ', session('student_nama')))->map(fn($word) => strtoupper(substr($word, 0, 1)))->join('') }}
+                    @endif
+
                 </div>
 
                 <div class="dropdown">

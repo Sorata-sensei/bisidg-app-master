@@ -74,6 +74,7 @@ Route::middleware(['auth', 'role:admin,superadmin,masteradmin'])->group(function
         Route::get('/{id}/edit', [StudentsAdminController::class, 'edit'])->name('edit');
         Route::put('/{id}', [StudentsAdminController::class, 'update'])->name('update');
         Route::delete('/{id}', [StudentsAdminController::class, 'destroy'])->name('destroy');
+        Route::get('/showCardByLecture/{id}',[StudentsAdminController::class, 'showCardByLecture'])->name('showCardByLecture');
     });
     // Dashboard
     Route::controller(DashboardController::class)

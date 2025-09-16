@@ -1,6 +1,33 @@
-@extends('admin.template.index')
+@extends('students.template.index')
 
 @push('css')
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        /* Styling tambahan biar select2 lebih rapi */
+        .select2-container .select2-selection--multiple {
+            min-height: 120px;
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid #ced4da;
+            background: #fff;
+            font-size: 14px;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #0d6efd;
+            border: none;
+            color: #fff;
+            padding: 4px 8px;
+            margin-top: 4px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: #fff;
+            margin-right: 4px;
+        }
+    </style>
     <style>
         .form-card {
             border-radius: 12px;
@@ -25,7 +52,6 @@
             vertical-align: middle;
         }
 
-        /* Pas Foto Frame */
         .pas-frame {
             overflow: hidden;
             background: #fff;
@@ -52,12 +78,10 @@
             }
         }
 
-        /* Field Info */
         .field-row {
             display: flex;
             align-items: center;
             gap: .75rem;
-            /* margin-bottom: .75rem; */
         }
 
         .field-label {
@@ -99,7 +123,6 @@
             }
         }
 
-        /* Tabel biar bisa scroll di layar kecil */
         .table-responsive {
             width: 100%;
             overflow-x: auto;
@@ -107,10 +130,9 @@
         }
 
         .table {
-            min-width: 800px;
+            min-width: 900px;
         }
 
-        /* Field info agar stack rapi di mobile */
         @media (max-width: 768px) {
             .col-7 .field-row {
                 flex-direction: column;
@@ -130,7 +152,6 @@
             }
         }
 
-        /* Foto biar ga overflow */
         .pas-frame {
             max-width: 100%;
         }
@@ -142,6 +163,7 @@
         <div class="form-card mx-auto col-12 col-md-10 col-lg-12">
             <div class="form-header">
                 <h5>KARTU KONSULTASI DENGAN PEMBIMBING AKADEMIK</h5>
+                <p><strong>Universitas Sugeng Hartono</strong></p>
             </div>
 
             <!-- Data Mahasiswa -->
@@ -160,7 +182,7 @@
 
                     <div class="field-row">
                         <label class="field-label">Nama Orang Tua</label>
-                        <p class="field-value">{{ $student->nama_orangtua ?? '-' }}</p>
+                        <p class="field-value">{{ $student->nama_orangtua }}</p>
                     </div>
 
                     <div class="field-row">
@@ -198,7 +220,7 @@
                             <th>IP</th>
                             <th>Tanggal</th>
                             <th>Komentar</th>
-                            <th>Mata kuliah tidak lulus</th>
+                            <th>Mata Kuliah Tidak Lulus</th>
                             <th>Tanda Tangan Mahasiswa</th>
                             <th>Tanda Tangan Dosen</th>
                         </tr>
@@ -210,53 +232,79 @@
                                 <td>{{ $row['semester'] }}</td>
                                 <td>{{ $row['sks'] }}</td>
                                 <td>{{ $row['ip'] }}</td>
-                                <td>{{ \Carbon\Carbon::parse($row['tanggal'])->translatedFormat('l, d F Y') }}
-                                </td>
+                                <td>{{ $row['tanggal'] }}</td>
                                 <td>{{ $row['komentar'] }}</td>
                                 <td>
                                     @if ($row->failed_courses_objects->count())
                                         @foreach ($row->failed_courses_objects as $fc)
-                                            <span class="badge bg-danger text-white mb-1">
+                                            <span class="badge bg-primary me-1 mb-1">
                                                 {{ $fc->code_prefix }}{{ $fc->code_number }} - {{ $fc->name }}
                                             </span>
                                         @endforeach
                                     @else
-                                        <span class="text-muted">Tidak Ada</span>
+                                        <span class="text-muted">-</span>
                                     @endif
+
+
+
+
                                 </td>
                                 <td>
-
                                     <img src="{{ asset('storage/' . $student->ttd) }}" alt="TTD Mahasiswa"
                                         style="max-height: 60px;">
-
                                 </td>
                                 <td>
-
                                     <img src="{{ asset('storage/' . $student->dosenPA->ttd) }}" alt="TTD Dosen"
                                         style="max-height: 60px;">
-
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center">Belum ada riwayat konsultasi</td>
+                                <td colspan="9" class="text-center">Belum ada riwayat konsultasi</td>
                             </tr>
                         @endforelse
 
-                        <!-- Input Row Baru -->
+                        <!-- Form Input Baru -->
                         <tr>
-                            {{-- <form action="{{ route('student.counseling.store', $student->id) }}" method="POST">
-                                @csrf
-                                <td>{{ count($history) + 1 }}</td>
-                                <td><input type="number" name="semester" class="form-control" required></td>
-                                <td><input type="number" name="sks" class="form-control" required></td>
-                                <td><input type="text" name="ip" class="form-control"></td>
-                                <td><input type="date" name="tanggal" class="form-control" required></td>
-                                <td><input type="text" name="komentar" class="form-control"></td>
-                                <td colspan="2">
-                                    <button type="submit" class="btn btn-sm btn-primary">Simpan</button>
+                            @if ($student->is_counseling == 1)
+                                <form action="{{ route('student.counseling.store', $student->id) }}" method="POST">
+                                    @csrf
+                                    <td>{{ count($history) + 1 }}</td>
+                                    <td>
+                                        <input type="number" name="semester" id="semesterInput" class="form-control"
+                                            required>
+                                    </td>
+                                    <td><input type="number" name="sks" class="form-control" required></td>
+                                    <td><input type="text" name="ip" class="form-control"></td>
+                                    <td><input type="date" name="tanggal" class="form-control" required></td>
+                                    <td><input type="text" name="komentar" class="form-control"></td>
+                                    <td>
+                                        <select name="failed_courses[]" id="failedCoursesSelect" class="form-select"
+                                            multiple>
+                                            @foreach ($courses as $course)
+                                                <option value="{{ $course->id }}">
+                                                    {{ $course->code_prefix }}{{ $course->code_number }} -
+                                                    {{ $course->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <small class="text-muted">Bisa pilih lebih dari 1, jika tidak ada abaikan
+                                            saja</small>
+                                    </td>
+
+                                    <td colspan="2">
+                                        <button type="submit" class="btn btn-sm btn-primary">Simpan</button>
+                                    </td>
+                                </form>
+                            @else
+                                <td colspan="9">
+                                    <div class="alert alert-info mb-0">
+                                        <p class="mb-0"><i class="fas fa-info-circle me-2"></i>
+                                            <b>Layanan bimbingan akademik belum dibuka atau sudah ditutup.</b>
+                                        </p>
+                                    </div>
                                 </td>
-                            </form> --}}
+                            @endif
                         </tr>
                     </tbody>
                 </table>
@@ -272,3 +320,16 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#failedCoursesSelect').select2({
+                placeholder: "Pilih mata kuliah gagal",
+                width: '100%'
+            });
+        });
+    </script>
+@endpush

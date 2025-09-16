@@ -30,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
             $greeting = 'Sore';
         }
         view()->composer('*', function ($view) use ($greeting) {
-            $view->with('pageTitle', session('pageTitle', 'Anwar Fauzi'));
+            $view->with('pageTitle', session('pageTitle', 'Bisnis Digital'));
             $view->with('greeting', $greeting);
         });
     }
