@@ -172,11 +172,11 @@
 
             <!-- Riwayat Konsultasi -->
             <div class="mt-4">
-                <h6 class="mb-3">Riwayat Konsultasi Terbaru</h6>
+                <h6 class="mb-3"><b>Riwayat Konsultasi Terbaru</b> </h6>
 
                 @if ($history->isNotEmpty())
                     @php $row = $history->first(); @endphp
-                    <div class="border rounded p-3 bg-light small">
+                    <div class="border-3 rounded p-3 bg-light small">
                         <div class="d-flex justify-content-between mb-2">
                             <span class="badge bg-primary"># Terbaru</span>
                             <small class="text-muted"><b>{{ \Carbon\Carbon::parse($row['tanggal'])->translatedFormat('l, d F Y') }}
@@ -203,7 +203,7 @@
                             @endif
                         </p>
 
-                        <div class="d-flex justify-content-end mt-3">
+                        {{-- <div class="d-flex justify-content-end mt-3">
                             <div class="text-center">
                                 <small class="d-block text-muted">Mahasiswa</small>
                                 <img src="{{ asset('storage/' . $student->ttd) }}" alt="TTD Mahasiswa"
@@ -214,7 +214,7 @@
                                 <img src="{{ asset('storage/' . $student->dosenPA->ttd) }}" alt="TTD Dosen"
                                     style="max-height: 30px;">
                             </div>
-                        </div>
+                        </div> --}}
                     </div>
                 @else
                     <div class="alert alert-warning">Belum ada riwayat konsultasi</div>
@@ -224,9 +224,9 @@
 
             <!-- Form Input Baru -->
             @if ($student->is_counseling == 1)
+                <h6 class="mb-3"><b>Isi Kartu Konsultasi</b> </h6>
                 <div class="card mt-4 shadow-sm">
                     <div class="card-body">
-                        <h6 class="mb-3">Tambah Konsultasi Baru</h6>
                         <form action="{{ route('student.counseling.store', $student->id) }}" method="POST">
                             @csrf
                             <div class="row g-3">
@@ -235,20 +235,20 @@
                                     <input type="number" name="semester" class="form-control" required>
                                 </div>
                                 <div class="col-6 col-md-3">
-                                    <label class="form-label">SKS</label>
+                                    <label class="form-label">SKS Yang diambil</label>
                                     <input type="number" name="sks" class="form-control" required>
                                 </div>
                                 <div class="col-6 col-md-3">
-                                    <label class="form-label">IP</label>
+                                    <label class="form-label">IP Semester lalu</label>
                                     <input type="text" name="ip" class="form-control">
                                 </div>
                                 <div class="col-6 col-md-3">
-                                    <label class="form-label">Tanggal</label>
+                                    <label class="form-label">Tanggal Bimbingan</label>
                                     <input type="date" name="tanggal" class="form-control" required>
                                 </div>
 
                                 <div class="col-12">
-                                    <label class="form-label">Komentar</label>
+                                    <label class="form-label">Komentar Pembimbing Akademik</label>
                                     <input type="text" name="komentar" class="form-control">
                                 </div>
 
