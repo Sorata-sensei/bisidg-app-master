@@ -26,7 +26,8 @@
                                 </div>
                                 <div class="col-auto">
                                     <div class="photo-wrapper">
-                                        <img src="{{ asset('storage/' . $user->photo) }}" alt="Photo Lecturer">
+                                        <img src="{{ asset('storage/' . $user->photo) }}" alt="Photo Lecturer"
+                                            style="max-height: 50px; max-width: 50px;  ">
                                     </div>
                                 </div>
                             </div>
