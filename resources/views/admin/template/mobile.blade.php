@@ -4,21 +4,21 @@
         <li class="mobile-nav-item">
             <a href="{{ route('dashboard.admin.index') }}"
                 class="mobile-nav-link {{ request()->is('admin/dashboard') ? 'active' : '' }}">
-                <span class="mobile-nav-icon">📊</span>
+                <i class="fa-solid fa-chart-pie mobile-nav-icon"></i>
                 <span>Dashboard</span>
             </a>
         </li>
         <li class="mobile-nav-item">
             <a href="{{ route('admin.students.index') }}"
                 class="mobile-nav-link {{ request()->is('admin/students') ? 'active' : '' }} {{ request()->is('admin/students/create') ? 'active' : '' }}">
-                <span class="mobile-nav-icon">👥</span>
+                <i class="fa-solid fa-users mobile-nav-icon"></i>
                 <span>Students</span>
             </a>
         </li>
         <li class="mobile-nav-item">
             <a href="{{ route('admin.counseling.index') }}"
                 class="mobile-nav-link {{ request()->is('admin/counseling') ? 'active' : '' }}">
-                <span class="mobile-nav-icon">📖</span>
+                <i class="fa-solid fa-book-open mobile-nav-icon"></i>
                 <span>Counseling</span>
             </a>
         </li>
@@ -26,7 +26,7 @@
             <li class="mobile-nav-item">
                 <a href="{{ route('user.admin.main') }}"
                     class="mobile-nav-link {{ request()->is('admin/user/main') ? 'active' : '' }}">
-                    <span class="mobile-nav-icon">📖</span>
+                    <i class="fa-solid fa-chalkboard-user mobile-nav-icon"></i>
                     <span>Lecturers</span>
                 </a>
             </li>

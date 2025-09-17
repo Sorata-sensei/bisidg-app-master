@@ -74,7 +74,14 @@
                                 <i class="fas fa-id-card me-2"></i>Nomor Induk Mahasiswa
                             </label>
                         </div>
-
+                        <div class="form-floating">
+                            <input type="password" class="form-control" id="password" name="password"
+                                placeholder="Password" required>
+                            <label for="password">
+                                <i class="fas fa-lock me-2"></i>Password
+                            </label>
+                            <i class="fas fa-eye input-icon" id="togglePassword" style="cursor: pointer;"></i>
+                        </div>
                         <div class="d-grid">
                             <button type="submit" class="btn btn-success btn-lg">
                                 <span>

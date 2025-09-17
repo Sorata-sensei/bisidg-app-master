@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class Student extends Model
+class Student extends Authenticatable
 {
+    use Notifiable;
+
     protected $fillable = [
-        'id_lecturer',
         'nama_lengkap',
-        'nama_orangtua',
-        'foto',
-        'ttd',
         'nim',
+        'password',
+        'email',
         'angkatan',
         'program_studi',
         'fakultas',
@@ -20,21 +21,29 @@ class Student extends Model
         'tanggal_lahir',
         'alamat',
         'no_telepon',
-        'email',
         'status_mahasiswa',
         'tanggal_masuk',
         'tanggal_lulus',
+        'is_counseling',
+        'tanggal_counseling',
         'notes',
+        'id_lecturer',
+        'foto',
+        'ttd',
+        'nama_orangtua',
     ];
+
+    protected $hidden = [
+        'password',
+    ];
+
     public function dosenPA()
     {
         return $this->belongsTo(User::class, 'id_lecturer');
     }
-public function counselings()
-{
-    return $this->hasMany(CardCounseling::class, 'id_student');
-}
 
-
-
+    public function counselings()
+    {
+        return $this->hasMany(CardCounseling::class, 'id_student');
+    }
 }

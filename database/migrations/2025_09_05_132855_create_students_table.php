@@ -16,6 +16,7 @@ return new class extends Migration
             $table->integer('id_lecturer')->unsigned(); // ID user (foreign key)
             $table->string('nama_lengkap', 200); // Nama lengkap
             $table->string('nama_orangtua', 250)->nullable(); // NIM unik (max 12 karakter)
+            $table->string('password');
             $table->text('foto')->nullable(); // Foto profil (path atau URL)
             $table->text('ttd')->nullable(); // Tanda tangan digital (path atau URL)
             $table->string('nim', 12)->unique(); // NIM unik (max 12 karakter)

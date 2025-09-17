@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Student;
 use Illuminate\Support\Facades\Validator;
 use App\Models\CardCounseling;
+use Illuminate\Support\Facades\Auth;
 class StudentsController extends Controller
 {
     /**
@@ -13,30 +14,45 @@ class StudentsController extends Controller
      */
     public function index(Request $request)
         {
-            
             $counseling = CardCounseling::where('id_student',decrypt(session('student_id')))->count();
             return view('students.dashboard.index',compact('counseling'));
         }
     
     public function editDataIndex(Request $request)
     {
+        
          $student = Student::with('dosenPA')->findOrFail(decrypt(session('student_id')));
-         return view('students.personal.edit', compact('student'));
+         $isDefaultPassword = \Hash::check('Bisdig2025', $student->password);
+         return view('students.personal.edit', compact('student','isDefaultPassword'));
     }
 
     public function updateData(Request $request)
 {
     $student = Student::findOrFail(decrypt(session('student_id')));
 
-    $request->validate([
-        'nama_orangtua' => 'nullable|string|max:255',
-        'tanggal_lahir' => 'nullable|date',
-        'alamat' => 'nullable|string',
-        'no_telepon' => 'nullable|string|max:20',
-        'email' => 'nullable|email|max:255',
-        'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-        'ttd' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-    ]);
+   $request->validate([
+    'nama_orangtua' => 'nullable|string|max:255',
+    'tanggal_lahir' => 'nullable|date',
+    'password' => 'nullable|string|min:8',
+    'alamat'        => 'nullable|string',
+    'no_telepon'    => 'nullable|string|max:20',
+    'email'         => 'nullable|email|max:255',
+    'foto'          => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+    'ttd'           => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+], [
+    // Custom messages
+    'password.min'        => 'Password must be at least 8 characters.',
+    'password.max'        => 'Password cannot be longer than 20 characters.',
+    'password.string'     => 'Password must be a valid text.',
+    'email.email'         => 'Please enter a valid email address.',
+    'foto.image'          => 'The photo must be an image.',
+    'foto.mimes'          => 'The photo must be a file of type: jpeg, png, jpg.',
+    'foto.max'            => 'The photo may not be larger than 2MB.',
+    'ttd.image'           => 'The signature must be an image.',
+    'ttd.mimes'           => 'The signature must be a file of type: jpeg, png, jpg.',
+    'ttd.max'             => 'The signature may not be larger than 2MB.',
+]);
+
 
     // Update hanya kalau masih kosong
     if (empty($student->nama_orangtua) && $request->filled('nama_orangtua')) {
@@ -88,7 +104,7 @@ class StudentsController extends Controller
 
         $student->ttd = $ttdPath;
     }
-
+    $student->password =  bcrypt($request->password);
     $student->save();
 
     return redirect()

@@ -29,6 +29,30 @@
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     @stack('css')
     <style>
+        .nav-icon {
+            margin-right: 8px;
+            width: 20px;
+            /* biar rata kiri */
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            color: #444;
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .nav-link.active,
+        .nav-link:hover {
+            background: #f0f4ff;
+            color: #007bff;
+            border-radius: 6px;
+        }
+
         .photo-wrapper {
 
             border-radius: 50%;

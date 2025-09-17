@@ -125,6 +125,15 @@
                                 <input type="text" name="nim" id="nim" class="form-control form-control-lg"
                                     value="{{ old('nim', $student->nim) }}" required readonly disabled>
                             </div>
+                            {{-- Password --}}
+                            @if ($isDefaultPassword)
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Change Password <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" name="password" id="password"
+                                        class="form-control form-control-lg" required>
+                                </div>
+                            @endif
 
                             {{-- Angkatan --}}
                             <div class="mb-3">

@@ -104,15 +104,23 @@ class StudentsAdminController extends Controller
 
    public function store(Request $request)
 {
-    // Validasi (Sesuaikan field dengan nama di Blade)
-    $validator = Validator::make($request->all(), [
-        'full_name' => 'required|string|max:100',                      // → nama_lengkap
-        'nim'       => 'required|string|unique:students,nim|max:12',  // → nim
-        'batch'     => 'required|integer|min:1900|max:2100',          // → angkatan
-        'gender'    => 'nullable|in:L,P',
-        'address'   => 'nullable|string|max:500',                      // → program_studi
-        'notes'     => 'nullable|string|max:1000',                    // → notes
-    ]);
+ 
+
+$validator = Validator::make($request->all(), [
+    'full_name' => 'required|string|max:100',                     
+    'nim'       => 'required|string|unique:students,nim|max:12',  
+    'batch'     => 'required|integer|min:1900|max:2100',          
+    'gender'    => 'nullable|in:L,P',
+    'address'   => 'nullable|string|max:500',                    
+    'notes'     => 'nullable|string|max:1000',                   
+], [
+    // Custom messages
+    'full_name.required' => 'Full name cannot be empty.',
+    'nim.required'       => 'NIM cannot be empty.',
+    'nim.unique'         => 'This NIM is already registered, please use another one.',
+    'batch.required'     => 'Batch cannot be empty.',
+]);
+
 
     if ($validator->fails()) {
         return redirect()->back()->withErrors($validator)->withInput();
