@@ -20,7 +20,7 @@
 </body>
 @include('auth.template.footer')
 @stack('scripts')
-
+{{-- 
 <script src="https://www.google.com/recaptcha/api.js?render={{ env('RECAPTCHA_SITE_KEY') }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -53,7 +53,8 @@
 
         attachRecaptcha('dosenForm', 'login_dosen');
         attachRecaptcha('mahasiswaForm', 'login_mahasiswa');
-    });
+    }); 
 </script>
+--}}
 
 </html>
