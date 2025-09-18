@@ -9,7 +9,10 @@
     <main class="main-content">
         <header class="header">
             <div>
-                <h2>Selamat {{ $greeting }} {{ session('student_nama') }}</h2>
+                <h2>
+                    Selamat {{ $greeting }} {{ ucfirst(explode(' ', trim(session('student_nama')))[0]) }}
+                </h2>
+
             </div>
             <div class="user-profile">
                 <div class="profile-img" style=" object-fit: cover; object-position: center;">

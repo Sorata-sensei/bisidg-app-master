@@ -2,6 +2,9 @@
 
 @push('css')
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/trix@1.3.1/dist/trix.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+
     <style>
         .form-control:focus {
             border-color: #4361ee;
@@ -39,8 +42,14 @@
         .modal-body i {
             font-size: 64px;
             color: #facc15;
-            /* kuning */
             margin-bottom: 16px;
+        }
+
+        /* Map styling */
+        #map {
+            height: 400px;
+            border-radius: 12px;
+            border: 1px solid #ccc;
         }
     </style>
 @endpush
@@ -61,6 +70,11 @@
                             @csrf
                             @method('PUT')
 
+                            @php
+                                $readonly = $student->is_edited == 0 ? 'readonly disabled' : '';
+                                $disabled = $student->is_edited == 0 ? 'disabled' : '';
+                            @endphp
+
                             {{-- Foto --}}
                             <div class="mb-3">
                                 <label for="foto" class="form-label">Foto Profil</label>
@@ -68,9 +82,13 @@
                                     <small class="d-block mt-2">Foto saat ini:</small>
                                     <img src="{{ asset('storage/' . $student->foto) }}" alt="Foto Mahasiswa"
                                         class="img-thumbnail mt-1" style="max-width: 150px;">
+                                    @if ($student->is_edited == 1)
+                                        <input type="file" name="foto" id="foto"
+                                            class="form-control form-control-lg mt-2" accept="image/*">
+                                    @endif
                                 @else
                                     <input type="file" name="foto" id="foto" class="form-control form-control-lg"
-                                        accept="image/*">
+                                        accept="image/*" {{ $disabled }}>
                                 @endif
                             </div>
 
@@ -81,24 +99,31 @@
                                     <small class="d-block mt-2">TTD saat ini:</small>
                                     <img src="{{ asset('storage/' . $student->ttd) }}" alt="Tanda Tangan"
                                         class="img-thumbnail mt-1" style="max-width: 150px;">
+                                    @if ($student->is_edited == 1)
+                                        <input type="file" name="ttd" id="ttd"
+                                            class="form-control form-control-lg mt-2" accept="image/*">
+                                    @endif
                                 @else
                                     <input type="file" name="ttd" id="ttd" class="form-control form-control-lg"
-                                        accept="image/*">
+                                        accept="image/*" {{ $disabled }}>
+                                @endif
+
+                                @if ($student->is_edited == 1 && !$student->ttd)
                                     <div class="alert alert-warning d-flex align-items-center mt-3" role="alert">
                                         <i class="bi bi-exclamation-triangle-fill me-2"></i>
                                         <div>
                                             <span class="fw-bold">Perhatian:</span>
                                             <span class="text-dark">Unggah tanda tangan digital dengan latar belakang
-                                                transparan.
-                                                Jika tanda tangan masih memiliki latar belakang, silakan bersihkan terlebih
-                                                dahulu menggunakan
+                                                transparan. Jika tanda tangan masih memiliki latar belakang, silakan
+                                                bersihkan
+                                                terlebih dahulu menggunakan
                                                 <a href="https://www.photoroom.com/tools/background-remover" target="_blank"
                                                     class="fw-semibold text-decoration-underline">alat penghapus latar
-                                                    belakang</a>.</span>
+                                                    belakang</a>.
+                                            </span>
                                         </div>
                                     </div>
                                 @endif
-
                             </div>
 
                             {{-- Nama Lengkap --}}
@@ -115,8 +140,7 @@
                                 <label for="nama_orangtua" class="form-label">Nama Orangtua</label>
                                 <input type="text" name="nama_orangtua" id="nama_orangtua"
                                     class="form-control form-control-lg"
-                                    value="{{ old('nama_orangtua', $student->nama_orangtua) }}"
-                                    {{ $student->nama_orangtua ? 'readonly disabled' : '' }}>
+                                    value="{{ old('nama_orangtua', $student->nama_orangtua) }}" {{ $readonly }}>
                             </div>
 
                             {{-- NIM --}}
@@ -125,20 +149,28 @@
                                 <input type="text" name="nim" id="nim" class="form-control form-control-lg"
                                     value="{{ old('nim', $student->nim) }}" required readonly disabled>
                             </div>
+
                             {{-- Password --}}
                             @if ($isDefaultPassword)
                                 <div class="mb-3">
-                                    <label for="password" class="form-label">Change Password <span
-                                            class="text-danger">*</span></label>
+                                    <label for="password" class="form-label">
+                                        Change Password <span class="text-danger">*</span>
+                                    </label>
                                     <input type="text" name="password" id="password"
-                                        class="form-control form-control-lg" required>
+                                        class="form-control form-control-lg"
+                                        {{ $student->is_edited == 0 ? 'readonly disabled' : 'required minlength=8' }}>
+
+                                    <small class="form-text text-muted">
+                                        Password minimal 8 karakter, gunakan kombinasi huruf dan angka agar lebih aman.
+                                    </small>
                                 </div>
                             @endif
 
                             {{-- Angkatan --}}
                             <div class="mb-3">
                                 <label for="angkatan" class="form-label">Angkatan</label>
-                                <input type="number" name="angkatan" id="angkatan" class="form-control form-control-lg"
+                                <input type="number" name="angkatan" id="angkatan"
+                                    class="form-control form-control-lg"
                                     value="{{ old('angkatan', $student->angkatan) }}" readonly disabled>
                             </div>
 
@@ -154,7 +186,7 @@
                             <div class="mb-3">
                                 <label for="jenis_kelamin" class="form-label">Jenis Kelamin</label>
                                 <select name="jenis_kelamin" id="jenis_kelamin" class="form-control form-control-lg"
-                                    {{ $student->jenis_kelamin ? 'disabled' : '' }}>
+                                    {{ $student->is_edited == 0 ? 'disabled' : '' }}>
                                     <option value="L"
                                         {{ old('jenis_kelamin', $student->jenis_kelamin) == 'L' ? 'selected' : '' }}>
                                         Laki-laki</option>
@@ -169,15 +201,46 @@
                                 <label for="tanggal_lahir" class="form-label">Tanggal Lahir</label>
                                 <input type="date" name="tanggal_lahir" id="tanggal_lahir"
                                     class="form-control form-control-lg"
-                                    value="{{ old('tanggal_lahir', $student->tanggal_lahir) }}"
-                                    {{ $student->tanggal_lahir ? 'readonly disabled' : '' }}>
+                                    value="{{ old('tanggal_lahir', $student->tanggal_lahir) }}" {{ $readonly }}>
                             </div>
 
                             {{-- Alamat --}}
                             <div class="mb-3">
                                 <label for="alamat" class="form-label">Alamat</label>
-                                <textarea name="alamat" id="alamat" rows="3" class="form-control form-control-lg"
-                                    {{ $student->alamat ? 'readonly disabled' : '' }}>{{ old('alamat', $student->alamat) }}</textarea>
+                                <textarea name="alamat" id="alamat" rows="3" class="form-control form-control-lg" {{ $readonly }}>{{ old('alamat', $student->alamat) }}</textarea>
+                            </div>
+
+                            {{-- Lokasi Berdasarkan Maps --}}
+                            <div class="card mb-4">
+                                <div class="card-header bg-light fw-semibold">
+                                    <i class="fas fa-map-marker-alt me-2 text-danger"></i> Lokasi Berdasarkan Maps
+                                </div>
+                                <div class="card-body">
+                                    @if ($student->is_edited == 0)
+                                        @if ($student->alamat_lat && $student->alamat_lng)
+                                            <p class="mb-2 text-muted">
+                                                Lokasi rumah Anda tersimpan. Klik tombol di bawah untuk membuka di Google
+                                                Maps:
+                                            </p>
+
+                                            <a href="https://www.google.com/maps?q={{ $student->alamat_lat }},{{ $student->alamat_lng }}"
+                                                target="_blank" class="btn btn-outline-primary">
+                                                <i class="fas fa-map-marked-alt me-2"></i> Lihat di Google Maps
+                                            </a>
+                                        @else
+                                            <p class="text-muted">Belum ada titik lokasi yang disimpan.</p>
+                                        @endif
+                                    @else
+                                        <div id="map"></div>
+                                        <input type="hidden" name="alamat_lat" id="alamat_lat"
+                                            value="{{ old('alamat_lat', $student->alamat_lat) }}">
+                                        <input type="hidden" name="alamat_lng" id="alamat_lng"
+                                            value="{{ old('alamat_lng', $student->alamat_lng) }}">
+                                        <small class="text-muted d-block mt-2">
+                                            Geser marker atau gunakan kolom pencarian untuk menentukan lokasi alamat Anda.
+                                        </small>
+                                    @endif
+                                </div>
                             </div>
 
                             {{-- No. Telepon --}}
@@ -185,33 +248,28 @@
                                 <label for="no_telepon" class="form-label">No. HP</label>
                                 <input type="text" name="no_telepon" id="no_telepon"
                                     class="form-control form-control-lg"
-                                    value="{{ old('no_telepon', $student->no_telepon) }}"
-                                    {{ $student->no_telepon ? 'readonly disabled' : '' }}>
+                                    value="{{ old('no_telepon', $student->no_telepon) }}" {{ $readonly }}>
+                            </div>
+
+                            {{-- No. Telepon Orang Tua --}}
+                            <div class="mb-3">
+                                <label for="no_telepon_orangtua" class="form-label">No. HP Orang Tua</label>
+                                <input type="text" name="no_telepon_orangtua" id="no_telepon_orangtua"
+                                    class="form-control form-control-lg"
+                                    value="{{ old('no_telepon_orangtua', $student->no_telepon_orangtua) }}"
+                                    {{ $readonly }}>
                             </div>
 
                             {{-- Email --}}
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
                                 <input type="email" name="email" id="email" class="form-control form-control-lg"
-                                    value="{{ old('email', $student->email) }}"
-                                    {{ $student->email ? 'readonly disabled' : '' }}>
+                                    value="{{ old('email', $student->email) }}" {{ $readonly }}>
                             </div>
 
                             {{-- Submit --}}
                             <div class="d-grid">
-                                @php
-                                    $allFilled =
-                                        $student->nama_orangtua &&
-                                        $student->tanggal_lahir &&
-                                        $student->alamat &&
-                                        $student->no_telepon &&
-                                        $student->email &&
-                                        $student->foto &&
-                                        $student->ttd &&
-                                        $student->jenis_kelamin;
-                                @endphp
-
-                                @if ($allFilled)
+                                @if ($student->is_edited == 0)
                                     <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal"
                                         data-bs-target="#lockedModal">
                                         <i class="fas fa-lock me-2"></i> Update Information
@@ -232,12 +290,27 @@
     {{-- Modal --}}
     <div class="modal fade" id="lockedModal" tabindex="-1" aria-labelledby="lockedModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <h5 class="mt-3">Perubahan Data Terkunci</h5>
-                    <p>Semua data sudah terisi. Penggantian data harus melalui <b>Dosen Pembimbing</b>.</p>
-                    <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Mengerti</button>
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header bg-gradient bg-warning text-dark rounded-top-4">
+                    <h5 class="modal-title fw-bold" id="lockedModalLabel">
+                        <i class="fas fa-lock me-2"></i> Akses Dibatasi
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center p-5">
+                    <div class="mb-3">
+                        <i class="fas fa-exclamation-triangle text-warning" style="font-size: 4rem;"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Perubahan Data Terkunci</h5>
+                    <p class="text-muted mt-2">
+                        Semua data sudah <span class="fw-semibold text-dark">terisi lengkap</span>.
+                        Jika ada kesalahan atau butuh perubahan, silakan hubungi <b>Dosen Pembimbing</b>.
+                    </p>
+                </div>
+                <div class="modal-footer border-0 justify-content-center">
+                    <button type="button" class="btn btn-warning px-4 fw-semibold rounded-pill" data-bs-dismiss="modal">
+                        <i class="fas fa-check-circle me-1"></i> Mengerti
+                    </button>
                 </div>
             </div>
         </div>
@@ -245,5 +318,44 @@
 @endsection
 
 @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/trix@1.3.1/dist/trix.js"></script>
+    @if ($student->is_edited == 1)
+        <script src="https://cdn.jsdelivr.net/npm/trix@1.3.1/dist/trix.js"></script>
+        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+        <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                var lat = {{ old('alamat_lat', $student->alamat_lat ?? -6.2) }};
+                var lng = {{ old('alamat_lng', $student->alamat_lng ?? 106.816666) }};
+
+                var map = L.map('map').setView([lat, lng], 13);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '© OpenStreetMap'
+                }).addTo(map);
+
+                var marker = L.marker([lat, lng], {
+                    draggable: true
+                }).addTo(map);
+
+                marker.on('dragend', function(e) {
+                    var position = marker.getLatLng();
+                    document.getElementById('alamat_lat').value = position.lat;
+                    document.getElementById('alamat_lng').value = position.lng;
+                });
+
+                L.Control.geocoder({
+                        defaultMarkGeocode: false
+                    })
+                    .on('markgeocode', function(e) {
+                        var center = e.geocode.center;
+                        map.setView(center, 16);
+                        marker.setLatLng(center);
+                        document.getElementById('alamat_lat').value = center.lat;
+                        document.getElementById('alamat_lng').value = center.lng;
+                    })
+                    .addTo(map);
+            });
+        </script>
+    @endif
 @endpush

@@ -155,14 +155,7 @@ $validator = Validator::make($request->all(), [
         'tanggal_masuk'     => now(),   // set tanggal masuk sesuai saat ini
     ];
 
-    // ✅ Tambahkan field yang perlu diisi (yang tidak ada di form, tapi wajib)
-    // Jika kamu ingin tambahkan field lain (seperti jenis_kelamin, tanggal_lahir, alamat) -> masukin manual
-    // Contoh (opsional): 
-    // 'jenis_kelamin' => 'L',  // atau dari form jika sudah ditambahkan
-    // 'tanggal_lahir' => '1990-01-01',
-    // 'alamat'        => 'Jl. Contoh No. 123',
-
-    // 🚀 Simpan data ke database
+  
     Student::create($studentData);
 
     return redirect()->route('admin.students.index')->with('success', 'Mahasiswa berhasil ditambahkan.');

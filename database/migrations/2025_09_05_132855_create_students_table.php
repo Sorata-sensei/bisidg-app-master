@@ -32,6 +32,7 @@ return new class extends Migration
             $table->date('tanggal_masuk'); // Tanggal resmi masuk kuliah
             $table->date('tanggal_lulus')->nullable(); // Bisa NULL jika belum lulus
             $table->integer('is_counseling')->default(0); // 0 = Belum, 1 = Sudah
+            $table->boolean('is_edited')->default(false); // false = belum, true = sudah
             $table->date('tanggal_counseling')->nullable(); // Tanggal terakhir konseling
             $table->text('notes')->nullable(); // Catatan tambahan
             // Timestamps otomatis: created_at, updated_at

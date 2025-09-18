@@ -49,6 +49,8 @@ Route::middleware(['auth', 'role:admin,superadmin,masteradmin'])->group(function
            
             Route::get('/open-close/{id}', [CounselingController::class, 'openclose'])
                 ->name('openclose');
+            Route::get('/open-close/data/{id}', [CounselingController::class, 'opencloseedit'])
+                ->name('opencloseedit');
         });
 
     // Internship

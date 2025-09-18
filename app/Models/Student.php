@@ -20,6 +20,8 @@ class Student extends Authenticatable
         'jenis_kelamin',
         'tanggal_lahir',
         'alamat',
+        'alamat_lat',
+        'alamat_lng',
         'no_telepon',
         'status_mahasiswa',
         'tanggal_masuk',
@@ -35,6 +37,9 @@ class Student extends Authenticatable
 
     protected $hidden = [
         'password',
+    ];
+    protected $casts = [
+        'is_edited' => 'boolean',
     ];
 
     public function dosenPA()

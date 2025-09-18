@@ -66,4 +66,18 @@ class CounselingController extends Controller
             return redirect()->back()->with('success', 'Status counseling berhasil diubah.');
         }
     }
+    public function opencloseedit($id){
+        $counseling = Student::find($id);
+        if ($counseling->is_edited == 0) {
+            $counseling->is_edited = '1'; 
+            $counseling->save();
+            return redirect()->back()->with('success', 'Status Edit Data berhasil diubah.');
+        
+        }
+        if ($counseling->is_edited == 1) {
+           $counseling->is_edited = '0'; 
+            $counseling->save();
+            return redirect()->back()->with('success', 'Status Edit Data berhasil diubah.');
+        }
+    }
 }

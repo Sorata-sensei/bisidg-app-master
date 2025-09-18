@@ -1,4 +1,5 @@
 @extends('auth.template.index')
+
 @section('content')
     <div class="login-container">
         <div class="login-card">
@@ -33,23 +34,23 @@
             <div class="tab-content" id="loginTabsContent">
                 <!-- Dosen tab -->
                 <div class="tab-pane fade show active" id="dosen" role="tabpanel" aria-labelledby="dosen-tab">
-                    <form method="POST" action="{{ route('auth.login.dosen') }}"id="dosenForm">
+                    <form method="POST" action="{{ route('auth.login.dosen') }}" id="dosenForm">
                         @csrf
                         <div class="form-floating">
-                            <input type="email" class="form-control" id="email" name="email"
+                            <input type="email" class="form-control" id="emailDosen" name="email"
                                 placeholder="Email address" required>
-                            <label for="email">
+                            <label for="emailDosen">
                                 <i class="fas fa-envelope me-2"></i>Email Address
                             </label>
                         </div>
 
                         <div class="form-floating">
-                            <input type="password" class="form-control" id="password" name="password"
+                            <input type="password" class="form-control" id="passwordDosen" name="password"
                                 placeholder="Password" required>
-                            <label for="password">
+                            <label for="passwordDosen">
                                 <i class="fas fa-lock me-2"></i>Password
                             </label>
-                            <i class="fas fa-eye input-icon" id="togglePassword" style="cursor: pointer;"></i>
+                            <i class="fas fa-eye input-icon" id="togglePasswordDosen" style="cursor: pointer;"></i>
                         </div>
 
                         <div class="d-grid">
@@ -75,12 +76,12 @@
                             </label>
                         </div>
                         <div class="form-floating">
-                            <input type="password" class="form-control" id="password" name="password"
+                            <input type="password" class="form-control" id="passwordMahasiswa" name="password"
                                 placeholder="Password" required>
-                            <label for="password">
+                            <label for="passwordMahasiswa">
                                 <i class="fas fa-lock me-2"></i>Password
                             </label>
-                            <i class="fas fa-eye input-icon" id="togglePassword" style="cursor: pointer;"></i>
+                            <i class="fas fa-eye input-icon" id="togglePasswordMahasiswa" style="cursor: pointer;"></i>
                         </div>
                         <div class="d-grid">
                             <button type="submit" class="btn btn-success btn-lg">
@@ -94,11 +95,80 @@
                 </div>
             </div>
 
-            <!-- Error Alert (Hidden by default) -->
-            <div class="alert alert-danger" style="display: none;" id="errorAlert">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                <span id="errorMessage">Login failed. Please try again.</span>
-            </div>
+            <!-- Error Alert -->
+            @if (session('error'))
+                <div class="alert alert-danger mt-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    {{ session('error') }}
+                </div>
+            @endif
         </div>
     </div>
 @endsection
+
+@push('css')
+    <style>
+        .form-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #ddd;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+@endpush
+
+@push('scripts')
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const overlay = document.getElementById("loadingOverlay");
+
+            // Toggle password function
+            const toggle = (toggleId, inputId) => {
+                const toggleIcon = document.getElementById(toggleId);
+                const input = document.getElementById(inputId);
+
+                if (toggleIcon && input) {
+                    toggleIcon.addEventListener("click", () => {
+                        const type = input.type === "password" ? "text" : "password";
+                        input.type = type;
+                        toggleIcon.classList.toggle("fa-eye-slash");
+                    });
+                }
+            };
+
+            toggle("togglePasswordDosen", "passwordDosen");
+            toggle("togglePasswordMahasiswa", "passwordMahasiswa");
+
+            // Show loading overlay on form submit
+            ["dosenForm", "mahasiswaForm"].forEach(formId => {
+                const form = document.getElementById(formId);
+                if (form) {
+                    form.addEventListener("submit", () => {
+                        overlay.style.display = "flex";
+                    });
+                }
+            });
+        });
+    </script>
+@endpush
