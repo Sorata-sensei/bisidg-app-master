@@ -42,8 +42,8 @@ public function updateData(Request $request)
     'no_telepon'    => 'nullable|string|max:20',
     'no_telepon_orangtua' => 'nullable|string|max:20',
     'email'         => 'nullable|email|max:255',
-    'foto'          => 'nullable|image|mimes:jpeg,png,jpg',
-    'ttd'           => 'nullable|image|mimes:jpeg,png,jpg',
+    'foto'          => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+    'ttd'           => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
 ], [
     'nama_orangtua.string' => 'Parent’s name must be text.',
     'nama_orangtua.max'    => 'Parent’s name cannot be longer than 255 characters.',
@@ -69,8 +69,10 @@ public function updateData(Request $request)
 
     'foto.image'           => 'Photo must be an image.',
     'foto.mimes'           => 'Photo must be a file of type: jpeg, png, jpg.',
+     'foto.max'            => 'Photo size must not exceed 2 MB.',
     'ttd.image'            => 'Signature must be an image.',
     'ttd.mimes'            => 'Signature must be a file of type: jpeg, png, jpg.',
+    'ttd.max'       => 'Signature size must not exceed 2 MB.',
 ]);
 
 //  return $request->all();
