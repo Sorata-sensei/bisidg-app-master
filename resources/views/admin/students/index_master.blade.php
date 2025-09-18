@@ -191,12 +191,15 @@
                                 <th>Jurusan</th>
                                 <th>Email</th>
                                 <th>Jenis Kelamin</th>
+                                <th>Maps</th>
                                 <th>Notes</th>
-                                <th>Counseling</th>
-                                <th>Aksi</th>
+                                <th>Total Counseling</th>
                                 @if (request()->is('admin/counseling/get-students/*'))
                                     <th>Counseling</th>
+                                    <th>Edit Request Approval</th>
                                 @endif
+
+                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -215,38 +218,66 @@
                                         </span>
                                     </td>
                                     <td>
-                                        @if ($student->notes)
-                                            <div class="trix-content" style="white-space: pre-wrap;">
-                                                {!! $student->notes !!}
-                                            </div>
+                                        @if ($student->alamat_lat !== null && $student->alamat_lng !== null)
+                                            <a href="https://www.google.com/maps?q={{ $student->alamat_lat }},{{ $student->alamat_lng }}"
+                                                target="_blank" class="btn btn-outline-primary">
+                                                <i class="fas fa-map-marked-alt me-2"></i> Lihat
+                                            </a>
                                         @else
-                                            <span class="text-muted">Tidak ada catatan</span>
+                                            Belum di isi
                                         @endif
                                     </td>
                                     <td>
-                                        <div class="d-flex flex-wrap gap-2">
-                                            @if ($student->is_counseling == 0)
-                                                <a href="{{ route('admin.counseling.openclose', $student->id) }}"
-                                                    class="btn btn-sm btn-primary">
-                                                    <i class="fas fa-plus-circle me-1"></i> Open
-                                                </a>
-                                                <a href="{{ route('admin.students.showCardByLecture', $student->id) }}"
-                                                    class="btn btn-sm btn-primary">
-                                                    <i class="fas fa-file-alt me-1"></i> Check
-                                                </a>
-                                            @else
-                                                <a href="{{ route('admin.counseling.openclose', $student->id) }}"
-                                                    class="btn btn-sm btn-secondary">
-                                                    <i class="fas fa-minus-circle me-1"></i> Closed
-                                                </a>
-                                                <a href="{{ route('admin.students.showCardByLecture', $student->id) }}"
-                                                    class="btn btn-sm btn-primary">
-                                                    <i class="fas fa-file-alt me-1"></i> Check
-                                                </a>
-                                            @endif
-                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                                            data-bs-target="#notesModal" data-id="{{ $student->id }}"
+                                            data-name="{{ $student->nama_lengkap }}" data-notes="{!! $student->notes !!}">
+                                            <i class="fas fa-sticky-note"></i> Notes
+                                        </button>
                                     </td>
+                                    <td>
+                                        <span class="badge bg-info text-dark">
+                                            {{ $student->counselings_count }} kali
+                                        </span>
+                                    </td>
+                                    @if (request()->is('admin/counseling/get-students/*'))
+                                        <td>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                @if ($student->is_counseling == 0)
+                                                    <a href="{{ route('admin.counseling.openclose', $student->id) }}"
+                                                        class="btn btn-sm btn-primary">
+                                                        <i class="fas fa-plus-circle me-1"></i> Open
+                                                    </a>
+                                                @else
+                                                    <a href="{{ route('admin.counseling.openclose', $student->id) }}"
+                                                        class="btn btn-sm btn-secondary">
+                                                        <i class="fas fa-minus-circle me-1"></i> Closed
+                                                    </a>
+                                                @endif
+                                                <a href="{{ route('admin.students.showCardByLecture', $student->id) }}"
+                                                    class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-file-alt me-1"></i> Check
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td>
 
+
+                                            <div class="d-flex flex-wrap gap-2">
+                                                @if ($student->is_edited == 0)
+                                                    <a href="{{ route('admin.counseling.opencloseedit', $student->id) }}"
+                                                        class="btn btn-sm btn-primary">
+                                                        <i class="fas fa-plus-circle me-1"></i> Open
+                                                    </a>
+                                                @else
+                                                    <a href="{{ route('admin.counseling.opencloseedit', $student->id) }}"
+                                                        class="btn btn-sm btn-secondary">
+                                                        <i class="fas fa-minus-circle me-1"></i> Closed
+                                                    </a>
+                                                @endif
+
+                                            </div>
+                                        </td>
+                                    @endif
                                     <td>
                                         <a href="{{ route('admin.students.edit', $student->id) }}"
                                             class="btn btn-sm btn-outline-primary">
@@ -258,12 +289,10 @@
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
                                     </td>
-
-
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="9" class="text-center text-muted py-5">
+                                    <td colspan="11" class="text-center text-muted py-5">
                                         <i class="fas fa-clipboard-list fa-2x mb-2"></i>
                                         <p class="mb-0">Tidak ada data mahasiswa.</p>
                                         <small class="text-muted">Silakan tambahkan data baru.</small>
@@ -277,32 +306,25 @@
                 <div class="d-flex justify-content-center mt-3">
                     {{ $students->appends(['search' => request('search')])->links('pagination::bootstrap-5') }}
                 </div>
-
             </div>
         </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <!-- Delete Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content animate__animated">
                 <form id="deleteForm" method="POST">
                     @csrf
                     @method('DELETE')
                     <div class="modal-header bg-danger text-white">
-                        <h5 class="modal-title" id="deleteModalLabel">
-                            <i class="fas fa-exclamation-triangle me-2"></i> Konfirmasi Hapus
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
+                        <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i> Konfirmasi Hapus</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body text-center">
                         <i class="fas fa-exclamation-circle text-danger mb-3"
                             style="font-size: 4rem; animation: pulse 1.2s infinite;"></i>
-
-                        <p class="mb-1">Apakah Anda yakin ingin menghapus <br>
-                            <strong id="studentName"></strong>?
-                        </p>
+                        <p class="mb-1">Apakah Anda yakin ingin menghapus <br><strong id="studentName"></strong>?</p>
                         <small class="text-muted">Tindakan ini tidak dapat dibatalkan.</small>
                     </div>
                     <div class="modal-footer justify-content-center">
@@ -313,34 +335,113 @@
             </div>
         </div>
     </div>
+
+    <!-- Notes Modal -->
+    <div class="modal fade" id="notesModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content animate__animated">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-sticky-note me-2"></i> Catatan Mahasiswa</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-clipboard-list text-primary mb-3"
+                            style="font-size: 4rem; animation: pulse 1.2s infinite;"></i>
+                        <h6 id="notesStudentName" class="fw-bold"></h6>
+                        <small class="text-muted">Catatan tambahan dari Dosen Pembimbing</small>
+                    </div>
+                    <div id="notesContent" class="border rounded p-3 bg-light trix-content"
+                        style="min-height:100px; max-height:250px; overflow-y:auto;">
+                        <span class="text-muted">Tidak ada catatan</span>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
     <script>
-        const deleteModal = document.getElementById('deleteModal');
-        deleteModal.addEventListener('show.bs.modal', function(event) {
-            const button = event.relatedTarget;
-            const studentId = button.getAttribute('data-id');
-            const studentName = button.getAttribute('data-name');
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof bootstrap === 'undefined') return;
 
-            // Set nama mahasiswa di modal
-            document.getElementById('studentName').textContent = studentName;
+            function attachModalAnimation(modalId, onShow = null) {
+                const modal = document.getElementById(modalId);
+                if (!modal) return;
+                const content = modal.querySelector('.modal-content');
+                content.classList.add('animate__animated');
 
-            // Set action form
-            const form = document.getElementById('deleteForm');
-            form.action = "{{ url('admin/students') }}/" + studentId;
+                modal.addEventListener('show.bs.modal', function(event) {
+                    if (onShow) onShow(event, modal);
+                    content.classList.remove('animate__fadeOutDown');
+                    content.classList.add('animate__fadeInUp');
+                    content.addEventListener('animationend', function handler() {
+                        content.classList.remove('animate__fadeInUp');
+                        content.removeEventListener('animationend', handler);
+                    }, {
+                        once: true
+                    });
+                });
 
-            // Tambahkan animasi masuk
-            const modalContent = deleteModal.querySelector('.modal-content');
-            modalContent.classList.remove('animate__fadeOutDown');
-            modalContent.classList.add('animate__fadeInUp');
-        });
+                modal.addEventListener('hide.bs.modal', function(event) {
+                    if (modal.dataset.bsAnimating === 'true') return;
+                    event.preventDefault();
+                    modal.dataset.bsAnimating = 'true';
+                    content.classList.remove('animate__fadeInUp');
+                    content.classList.add('animate__fadeOutDown');
+                    content.addEventListener('animationend', function handler() {
+                        const instance = bootstrap.Modal.getInstance(modal);
+                        if (instance) {
+                            instance.hide();
+                        } else {
+                            modal.classList.remove('show');
+                            modal.style.display = 'none';
+                            document.body.classList.remove('modal-open');
+                            document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+                            content.classList.remove('animate__fadeOutDown');
+                            delete modal.dataset.bsAnimating;
+                        }
+                        content.removeEventListener('animationend', handler);
+                    }, {
+                        once: true
+                    });
+                });
 
-        deleteModal.addEventListener('hide.bs.modal', function() {
-            const modalContent = deleteModal.querySelector('.modal-content');
-            modalContent.classList.remove('animate__fadeInUp');
-            modalContent.classList.add('animate__fadeOutDown');
+                modal.addEventListener('hidden.bs.modal', function() {
+                    content.classList.remove('animate__fadeInUp', 'animate__fadeOutDown');
+                    delete modal.dataset.bsAnimating;
+                });
+            }
+
+            // Delete Modal
+            attachModalAnimation('deleteModal', function(event, modal) {
+                if (modal.id === 'deleteModal' && event.relatedTarget) {
+                    const btn = event.relatedTarget;
+                    const studentId = btn.getAttribute('data-id');
+                    const studentName = btn.getAttribute('data-name');
+                    document.getElementById('studentName').textContent = studentName;
+                    document.getElementById('deleteForm').action = "{{ url('admin/students') }}/" +
+                        studentId;
+                }
+            });
+
+            // Notes Modal
+            attachModalAnimation('notesModal', function(event, modal) {
+                if (modal.id === 'notesModal' && event.relatedTarget) {
+                    const btn = event.relatedTarget;
+                    const studentName = btn.getAttribute('data-name');
+                    const notes = btn.getAttribute('data-notes');
+                    document.getElementById('notesStudentName').textContent = studentName;
+                    document.getElementById('notesContent').innerHTML = notes ?
+                        notes : '<span class="text-muted">Tidak ada catatan</span>';
+                }
+            });
         });
     </script>
 @endpush
