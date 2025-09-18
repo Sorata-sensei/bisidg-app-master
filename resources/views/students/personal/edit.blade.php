@@ -65,8 +65,8 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <form id="studentForm" action="{{ route('student.personal.updateData', $student->id) }}"
-                            method="POST" enctype="multipart/form-data">
+                        <form id="studentForm" action="{{ route('student.personal.updateData') }}" method="POST"
+                            enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
 

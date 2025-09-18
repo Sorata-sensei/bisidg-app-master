@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\Course;
 class CardCounselingController extends Controller
 {
-    public function show($id_student)
+    public function show()
 {
     $courses = Course::all();
     $student = Student::with('dosenPA')->findOrFail(decrypt(session('student_id')));
