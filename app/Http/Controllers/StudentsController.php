@@ -42,8 +42,8 @@ public function updateData(Request $request)
         'no_telepon'    => 'nullable|string|max:20',
         'no_telepon_orangtua' => 'nullable|string|max:20',
         'email'         => 'nullable|email|max:255',
-        'foto'          => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-        'ttd'           => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        'foto'          => 'nullable|image|mimes:jpeg,png,jpg',
+        'ttd'           => 'nullable|image|mimes:jpeg,png,jpg',
     ]);
 //  return $request->all();
     try {
