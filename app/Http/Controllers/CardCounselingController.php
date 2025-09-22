@@ -6,6 +6,7 @@ use App\Models\Student;
 use App\Models\CardCounseling;
 use Illuminate\Http\Request;
 use App\Models\Course;
+    use Illuminate\Support\Facades\DB;
 class CardCounselingController extends Controller
 {
     public function show()
@@ -50,41 +51,51 @@ class CardCounselingController extends Controller
 
     
 
-    public function store(Request $request, $id_student)
+
+
+public function store(Request $request, $id_student)
 {
     $student = Student::findOrFail(decrypt(session('student_id')));
 
-    $request->validate([
-        'semester'          => 'required|numeric',
-        'sks'               => 'required|numeric',
-        'ip'                => 'nullable|numeric|between:0,999.99',
+    $validated = $request->validate([
+        'semester'          => 'required|numeric|min:1',
+        'sks'               => 'required|numeric|min:1',
+        'ip'                => [
+            'nullable',
+            'regex:/^(?:\d{1})(\.\d{1,2})?$/'
+        ],
         'tanggal'           => 'required|date',
-        'komentar'          => 'nullable|string',
-        'failed_courses'    => 'nullable|array',   // validasi harus array
-        'failed_courses.*'  => 'string',           // setiap item berupa string
-        'retaken_courses'   => 'nullable|array',   // validasi juga array
-        'retaken_courses.*' => 'string',           // tiap item string juga
+        'komentar'          => 'nullable|string|max:500',
+        'failed_courses'    => 'nullable|array',
+        'failed_courses.*'  => 'string|max:100',
+        'retaken_courses'   => 'nullable|array',
+        'retaken_courses.*' => 'string|max:100',
+    ], [
+        'ip.regex' => 'IP harus dalam format x.xx (contoh: 3.43, maksimal 2 digit sebelum dan 2 digit setelah koma).',
     ]);
 
-    $student->is_counseling = '0'; 
-    $student->save();
+    DB::transaction(function () use ($student, $validated, $id_student) {
+        CardCounseling::create([
+            'id_student'      => $id_student,
+            'semester'        => $validated['semester'],
+            'sks'             => $validated['sks'],
+            'ip'              => $validated['ip'] ?? null,
+            'tanggal'         => $validated['tanggal'],
+            'komentar'        => $validated['komentar'] ?? null,
+            'failed_courses'  => $validated['failed_courses'] ?? [],
+            'retaken_courses' => $validated['retaken_courses'] ?? [],
+        ]);
 
-    CardCounseling::create([
-        'id_student'      => $id_student,
-        'semester'        => $request->semester,
-        'sks'             => $request->sks,
-        'ip'              => $request->ip,
-        'tanggal'         => $request->tanggal,
-        'komentar'        => $request->komentar,
-        'failed_courses'  => $request->failed_courses,   // langsung array
-        'retaken_courses' => $request->retaken_courses,  // langsung array
-    ]);
-
+        // hanya jalan kalau create berhasil
+        $student->is_counseling = '0'; 
+        $student->save();
+    });
 
     return redirect()
         ->route('student.counseling.show', encrypt(session('student_id')))
         ->with('success', 'Data konsultasi berhasil ditambahkan');
 }
+
 
 
 
