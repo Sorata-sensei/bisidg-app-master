@@ -57,7 +57,7 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('admin.students.update', $student->id) }}" method="POST">
+                        <form action="{{ route('admin.students.update', ['id' => $student->id]) }}" method="POST">
                             @csrf
                             @method('PUT')
 
