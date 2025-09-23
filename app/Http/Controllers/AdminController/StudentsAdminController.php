@@ -87,8 +87,9 @@ class StudentsAdminController extends Controller
         $dosen = User::findOrFail($id);
         $search = $request->input('search');
 
-        $students = Student::withCount('counselings')
-            ->where('id_lecturer', Auth::id())
+      
+       $students = Student::withCount('counselings')
+            ->where('id_lecturer', $dosen->id)
             ->where('angkatan', $batch)
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
