@@ -9,7 +9,21 @@ class Student extends Authenticatable
 {
     use Notifiable;
 
+    /*
+    |--------------------------------------------------------------------------
+    | Constants
+    |--------------------------------------------------------------------------
+    */
+    const STATUS_ACTIVE   = 'Aktif';
+    const DEFAULT_PROGRAM = 'Bisnis Digital';
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mass Assignment
+    |--------------------------------------------------------------------------
+    */
     protected $fillable = [
+        'id_lecturer',
         'nama_lengkap',
         'nim',
         'password',
@@ -29,26 +43,68 @@ class Student extends Authenticatable
         'is_counseling',
         'tanggal_counseling',
         'notes',
-        'id_lecturer',
         'foto',
         'ttd',
         'nama_orangtua',
+        'is_edited',
     ];
 
+    /*
+    |--------------------------------------------------------------------------
+    | Hidden & Casts
+    |--------------------------------------------------------------------------
+    */
     protected $hidden = [
         'password',
     ];
+
     protected $casts = [
         'is_edited' => 'boolean',
+        'is_counseling' => 'boolean',
+        'tanggal_masuk' => 'datetime',
+        'tanggal_lulus' => 'datetime',
+        'tanggal_counseling' => 'datetime',
     ];
 
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
     public function dosenPA()
     {
-        return $this->belongsTo(User::class, 'id_lecturer');
+        return $this->belongsTo(User::class, 'id_lecturer', 'id');
     }
 
     public function counselings()
     {
-        return $this->hasMany(CardCounseling::class, 'id_student');
+        return $this->hasMany(CardCounseling::class, 'id_student', 'id');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Query Scopes
+    |--------------------------------------------------------------------------
+    */
+    public function scopeByLecturer($query, $lecturerId)
+    {
+        return $query->where('id_lecturer', $lecturerId);
+    }
+
+    public function scopeByBatch($query, $batch)
+    {
+        return $query->where('angkatan', $batch);
+    }
+
+    public function scopeSearch($query, $search)
+    {
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_lengkap', 'like', "%{$search}%")
+                  ->orWhere('nim', 'like', "%{$search}%")
+                  ->orWhere('angkatan', 'like', "%{$search}%");
+            });
+        }
+        return $query;
     }
 }

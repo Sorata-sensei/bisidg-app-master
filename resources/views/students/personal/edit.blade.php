@@ -47,9 +47,33 @@
 
         /* Map styling */
         #map {
+            width: 100%;
             height: 400px;
             border-radius: 12px;
             border: 1px solid #ccc;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .form-control-lg {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            .img-thumbnail {
+                max-width: 100px;
+                height: auto;
+            }
+
+            .card-header h5 {
+                font-size: 16px;
+            }
         }
     </style>
 @endpush
@@ -57,7 +81,7 @@
 @section('content')
     <div class="container-fluid">
         <div class="row justify-content-center">
-            <div class="col-md-11">
+            <div class="col-lg-10 col-md-12">
                 <div class="card shadow-sm border-0">
                     <div class="card-header bg-warning text-dark">
                         <h5 class="mb-0">
@@ -75,142 +99,141 @@
                                 $disabled = $student->is_edited == 0 ? 'disabled' : '';
                             @endphp
 
-                            {{-- Foto --}}
-                            <div class="mb-3">
-                                <label for="foto" class="form-label">Foto Profil</label>
-                                @if ($student->foto)
-                                    <small class="d-block mt-2">Foto saat ini:</small>
-                                    <img src="{{ asset('storage/' . $student->foto) }}" alt="Foto Mahasiswa"
-                                        class="img-thumbnail mt-1" style="max-width: 150px;">
-                                    @if ($student->is_edited == 1)
+                            {{-- Foto & TTD --}}
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="foto" class="form-label">Foto Profil</label>
+                                    @if ($student->foto)
+                                        <small class="d-block mt-2">Foto saat ini:</small>
+                                        <img src="{{ asset('storage/' . $student->foto) }}" alt="Foto Mahasiswa"
+                                            class="img-thumbnail img-fluid mt-1" style="max-width: 150px;">
+                                        @if ($student->is_edited == 1)
+                                            <input type="file" name="foto" id="foto"
+                                                class="form-control form-control-lg mt-2" accept="image/*">
+                                        @endif
+                                    @else
                                         <input type="file" name="foto" id="foto"
-                                            class="form-control form-control-lg mt-2" accept="image/*">
+                                            class="form-control form-control-lg" accept="image/*" {{ $disabled }}>
                                     @endif
-                                @else
-                                    <input type="file" name="foto" id="foto" class="form-control form-control-lg"
-                                        accept="image/*" {{ $disabled }}>
-                                @endif
-                            </div>
-
-                            {{-- Tanda Tangan --}}
-                            <div class="mb-3">
-                                <label for="ttd" class="form-label">Tanda Tangan</label>
-                                @if ($student->ttd)
-                                    <small class="d-block mt-2">TTD saat ini:</small>
-                                    <img src="{{ asset('storage/' . $student->ttd) }}" alt="Tanda Tangan"
-                                        class="img-thumbnail mt-1" style="max-width: 150px;">
-                                    @if ($student->is_edited == 1)
-                                        <input type="file" name="ttd" id="ttd"
-                                            class="form-control form-control-lg mt-2" accept="image/*">
-                                    @endif
-                                @else
-                                    <input type="file" name="ttd" id="ttd" class="form-control form-control-lg"
-                                        accept="image/*" {{ $disabled }}>
-                                @endif
-
-                                @if ($student->is_edited == 1 && !$student->ttd)
-                                    <div class="alert alert-warning d-flex align-items-center mt-3" role="alert">
-                                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                                        <div>
-                                            <span class="fw-bold">Perhatian:</span>
-                                            <span class="text-dark">Unggah tanda tangan digital dengan latar belakang
-                                                transparan. Jika tanda tangan masih memiliki latar belakang, silakan
-                                                bersihkan
-                                                terlebih dahulu menggunakan
-                                                <a href="https://www.photoroom.com/tools/background-remover" target="_blank"
-                                                    class="fw-semibold text-decoration-underline">alat penghapus latar
-                                                    belakang</a>.
-                                            </span>
-                                        </div>
-                                    </div>
-                                @endif
-                            </div>
-
-                            {{-- Nama Lengkap --}}
-                            <div class="mb-3">
-                                <label for="nama_lengkap" class="form-label">Nama Lengkap <span
-                                        class="text-danger">*</span></label>
-                                <input type="text" name="nama_lengkap" id="nama_lengkap"
-                                    class="form-control form-control-lg"
-                                    value="{{ old('nama_lengkap', $student->nama_lengkap) }}" readonly disabled>
-                            </div>
-
-                            {{-- Nama Orangtua --}}
-                            <div class="mb-3">
-                                <label for="nama_orangtua" class="form-label">Nama Orangtua</label>
-                                <input type="text" name="nama_orangtua" id="nama_orangtua"
-                                    class="form-control form-control-lg"
-                                    value="{{ old('nama_orangtua', $student->nama_orangtua) }}" {{ $readonly }}>
-                            </div>
-
-                            {{-- NIM --}}
-                            <div class="mb-3">
-                                <label for="nim" class="form-label">NIM <span class="text-danger">*</span></label>
-                                <input type="text" name="nim" id="nim" class="form-control form-control-lg"
-                                    value="{{ old('nim', $student->nim) }}" required readonly disabled>
-                            </div>
-
-                            {{-- Password --}}
-                            @if ($isDefaultPassword)
-                                <div class="mb-3">
-                                    <label for="password" class="form-label">
-                                        Change Password <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="text" name="password" id="password"
-                                        class="form-control form-control-lg"
-                                        {{ $student->is_edited == 0 ? 'readonly disabled' : 'required minlength=8' }}>
-
-                                    <small class="form-text text-muted">
-                                        Password minimal 8 karakter, gunakan kombinasi huruf dan angka agar lebih aman.
-                                    </small>
                                 </div>
-                            @endif
 
-                            {{-- Angkatan --}}
-                            <div class="mb-3">
-                                <label for="angkatan" class="form-label">Angkatan</label>
-                                <input type="number" name="angkatan" id="angkatan"
-                                    class="form-control form-control-lg"
-                                    value="{{ old('angkatan', $student->angkatan) }}" readonly disabled>
+                                <div class="col-md-6 mb-3">
+                                    <label for="ttd" class="form-label">Tanda Tangan</label>
+                                    @if ($student->ttd)
+                                        <small class="d-block mt-2">TTD saat ini:</small>
+                                        <img src="{{ asset('storage/' . $student->ttd) }}" alt="Tanda Tangan"
+                                            class="img-thumbnail img-fluid mt-1" style="max-width: 150px;">
+                                        @if ($student->is_edited == 1)
+                                            <input type="file" name="ttd" id="ttd"
+                                                class="form-control form-control-lg mt-2" accept="image/*">
+                                        @endif
+                                    @else
+                                        <input type="file" name="ttd" id="ttd"
+                                            class="form-control form-control-lg" accept="image/*" {{ $disabled }}>
+                                    @endif
+
+                                    @if ($student->is_edited == 1 && !$student->ttd)
+                                        <div class="alert alert-warning d-flex align-items-center mt-3" role="alert">
+                                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                            <div>
+                                                <span class="fw-bold">Perhatian:</span>
+                                                <span class="text-dark">Unggah tanda tangan digital dengan latar belakang
+                                                    transparan. Jika tanda tangan masih memiliki latar belakang, silakan
+                                                    bersihkan terlebih dahulu menggunakan
+                                                    <a href="https://www.photoroom.com/tools/background-remover"
+                                                        target="_blank" class="fw-semibold text-decoration-underline">alat
+                                                        penghapus latar
+                                                        belakang</a>.
+                                                </span>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
 
-                            {{-- Program Studi --}}
-                            <div class="mb-3">
-                                <label for="program_studi" class="form-label">Program Studi</label>
-                                <input type="text" name="program_studi" id="program_studi"
-                                    class="form-control form-control-lg"
-                                    value="{{ old('program_studi', $student->program_studi) }}" readonly disabled>
+                            {{-- Data Pribadi --}}
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="nama_lengkap" class="form-label">Nama Lengkap <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" name="nama_lengkap" id="nama_lengkap"
+                                        class="form-control form-control-lg"
+                                        value="{{ old('nama_lengkap', $student->nama_lengkap) }}" readonly disabled>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="nama_orangtua" class="form-label">Nama Orangtua</label>
+                                    <input type="text" name="nama_orangtua" id="nama_orangtua"
+                                        class="form-control form-control-lg"
+                                        value="{{ old('nama_orangtua', $student->nama_orangtua) }}" {{ $readonly }}>
+                                </div>
                             </div>
 
-                            {{-- Jenis Kelamin --}}
-                            <div class="mb-3">
-                                <label for="jenis_kelamin" class="form-label">Jenis Kelamin</label>
-                                <select name="jenis_kelamin" id="jenis_kelamin" class="form-control form-control-lg"
-                                    {{ $student->is_edited == 0 ? 'disabled' : '' }}>
-                                    <option value="L"
-                                        {{ old('jenis_kelamin', $student->jenis_kelamin) == 'L' ? 'selected' : '' }}>
-                                        Laki-laki</option>
-                                    <option value="P"
-                                        {{ old('jenis_kelamin', $student->jenis_kelamin) == 'P' ? 'selected' : '' }}>
-                                        Perempuan</option>
-                                </select>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="nim" class="form-label">NIM <span class="text-danger">*</span></label>
+                                    <input type="text" name="nim" id="nim" class="form-control form-control-lg"
+                                        value="{{ old('nim', $student->nim) }}" required readonly disabled>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    @if ($isDefaultPassword)
+                                        <label for="password" class="form-label">Change Password <span
+                                                class="text-danger">*</span></label>
+                                        <input type="text" name="password" id="password"
+                                            class="form-control form-control-lg"
+                                            {{ $student->is_edited == 0 ? 'readonly disabled' : 'required minlength=8' }}>
+                                        <small class="form-text text-muted">
+                                            Password minimal 8 karakter, gunakan kombinasi huruf dan angka agar lebih aman.
+                                        </small>
+                                    @endif
+                                </div>
                             </div>
 
-                            {{-- Tanggal Lahir --}}
-                            <div class="mb-3">
-                                <label for="tanggal_lahir" class="form-label">Tanggal Lahir</label>
-                                <input type="date" name="tanggal_lahir" id="tanggal_lahir"
-                                    class="form-control form-control-lg"
-                                    value="{{ old('tanggal_lahir', $student->tanggal_lahir) }}" {{ $readonly }}>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="angkatan" class="form-label">Angkatan</label>
+                                    <input type="number" name="angkatan" id="angkatan"
+                                        class="form-control form-control-lg"
+                                        value="{{ old('angkatan', $student->angkatan) }}" readonly disabled>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="program_studi" class="form-label">Program Studi</label>
+                                    <input type="text" name="program_studi" id="program_studi"
+                                        class="form-control form-control-lg"
+                                        value="{{ old('program_studi', $student->program_studi) }}" readonly disabled>
+                                </div>
                             </div>
 
-                            {{-- Alamat --}}
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="jenis_kelamin" class="form-label">Jenis Kelamin</label>
+                                    <select name="jenis_kelamin" id="jenis_kelamin" class="form-control form-control-lg"
+                                        {{ $student->is_edited == 0 ? 'disabled' : '' }}>
+                                        <option value="L"
+                                            {{ old('jenis_kelamin', $student->jenis_kelamin) == 'L' ? 'selected' : '' }}>
+                                            Laki-laki</option>
+                                        <option value="P"
+                                            {{ old('jenis_kelamin', $student->jenis_kelamin) == 'P' ? 'selected' : '' }}>
+                                            Perempuan</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="tanggal_lahir" class="form-label">Tanggal Lahir</label>
+                                    <input type="date" name="tanggal_lahir" id="tanggal_lahir"
+                                        class="form-control form-control-lg"
+                                        value="{{ old('tanggal_lahir', $student->tanggal_lahir) }}" {{ $readonly }}>
+                                </div>
+                            </div>
+
                             <div class="mb-3">
                                 <label for="alamat" class="form-label">Alamat</label>
                                 <textarea name="alamat" id="alamat" rows="3" class="form-control form-control-lg" {{ $readonly }}>{{ old('alamat', $student->alamat) }}</textarea>
                             </div>
 
-                            {{-- Lokasi Berdasarkan Maps --}}
+                            {{-- Lokasi Maps --}}
                             <div class="card mb-4">
                                 <div class="card-header bg-light fw-semibold">
                                     <i class="fas fa-map-marker-alt me-2 text-danger"></i> Lokasi Berdasarkan Maps
@@ -222,7 +245,6 @@
                                                 Lokasi rumah Anda tersimpan. Klik tombol di bawah untuk membuka di Google
                                                 Maps:
                                             </p>
-
                                             <a href="https://www.google.com/maps?q={{ $student->alamat_lat }},{{ $student->alamat_lng }}"
                                                 target="_blank" class="btn btn-outline-primary">
                                                 <i class="fas fa-map-marked-alt me-2"></i> Lihat di Google Maps
@@ -243,24 +265,23 @@
                                 </div>
                             </div>
 
-                            {{-- No. Telepon --}}
-                            <div class="mb-3">
-                                <label for="no_telepon" class="form-label">No. HP</label>
-                                <input type="text" name="no_telepon" id="no_telepon"
-                                    class="form-control form-control-lg"
-                                    value="{{ old('no_telepon', $student->no_telepon) }}" {{ $readonly }}>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="no_telepon" class="form-label">No. HP</label>
+                                    <input type="text" name="no_telepon" id="no_telepon"
+                                        class="form-control form-control-lg"
+                                        value="{{ old('no_telepon', $student->no_telepon) }}" {{ $readonly }}>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="no_telepon_orangtua" class="form-label">No. HP Orang Tua</label>
+                                    <input type="text" name="no_telepon_orangtua" id="no_telepon_orangtua"
+                                        class="form-control form-control-lg"
+                                        value="{{ old('no_telepon_orangtua', $student->no_telepon_orangtua) }}"
+                                        {{ $readonly }}>
+                                </div>
                             </div>
 
-                            {{-- No. Telepon Orang Tua --}}
-                            <div class="mb-3">
-                                <label for="no_telepon_orangtua" class="form-label">No. HP Orang Tua</label>
-                                <input type="text" name="no_telepon_orangtua" id="no_telepon_orangtua"
-                                    class="form-control form-control-lg"
-                                    value="{{ old('no_telepon_orangtua', $student->no_telepon_orangtua) }}"
-                                    {{ $readonly }}>
-                            </div>
-
-                            {{-- Email --}}
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
                                 <input type="email" name="email" id="email" class="form-control form-control-lg"
@@ -268,7 +289,7 @@
                             </div>
 
                             {{-- Submit --}}
-                            <div class="d-grid">
+                            <div class="d-grid mt-4">
                                 @if ($student->is_edited == 0)
                                     <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal"
                                         data-bs-target="#lockedModal">

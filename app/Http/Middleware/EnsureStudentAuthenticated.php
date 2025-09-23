@@ -16,7 +16,7 @@ class EnsureStudentAuthenticated
     public function handle($request, Closure $next)
 {
     if (! $request->session()->has('student_id')) {
-        return redirect()->route('login')->with('error', 'Silakan login sebagai mahasiswa.');
+        return redirect()->route('auth.login')->with('error', 'Silakan login sebagai mahasiswa.');
     }
     return $next($request);
 }

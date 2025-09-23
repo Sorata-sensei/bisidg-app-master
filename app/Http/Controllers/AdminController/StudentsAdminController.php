@@ -2,233 +2,129 @@
 
 namespace App\Http\Controllers\AdminController;
 
-use Illuminate\Http\Request;
-use App\Models\Student;
 use App\Http\Controllers\Controller;
-use Auth;
-use Illuminate\Support\Facades\Validator;
+use App\Models\Student;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
-use App\Models\CardCounseling;
 use App\Models\Course;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
 class StudentsAdminController extends Controller
 {
-    /**
-     * Display a listing of the admin.students.
-     */
-   public function index(Request $request)
-{
-    $search = $request->input('search');
-
-    $students = Student::withCount('counselings') // hitung jumlah counseling
-        ->where('id_lecturer', Auth::id())
-        ->when($search, function ($query, $search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('nama_lengkap', 'like', "%{$search}%")
-                  ->orWhere('nim', 'like', "%{$search}%")
-                  ->orWhere('angkatan', 'like', "%{$search}%");
-            });
-        })
-        ->latest()
-        ->paginate(10)
-        ->appends(['search' => $search]);
-
-    return view('admin.students.index', compact('students', 'search'));
-}
-
-
-    public function showCardByLecture($student_id)
-{
-    // Ambil data mahasiswa + dosen PA + counseling (riwayat)
-    $student = Student::with(['dosenPA', 'counselings'])->findOrFail($student_id);
-
-    // Ambil semua riwayat counseling, urutkan biar rapih
-   $history = $student->counselings()->orderBy('created_at', 'asc')->get()->map(function ($item) {
-        $ids = is_array($item->failed_courses)
-            ? $item->failed_courses
-            : json_decode($item->failed_courses, true);
-
-        $item->failed_courses_objects = Course::whereIn('id', $ids ?: [])->get();
-        return $item;
-    });
-
-    // Tampilkan form tambah counseling + riwayat
-    return view('admin.counseling.add_form_student', compact('student', 'history'));
-}
-
-    public function CheckStudentByLecturer($id)
+    public function index(Request $request)
     {
-       
-        $dosen = User::find($id);
-            if (!$dosen || !in_array($dosen->role, ['admin', 'superadmin', 'masteradmin'])) {
-                return redirect()->back()->with('error', 'Dosen tidak ditemukan atau bukan dosen pembimbing.');
-            }
-        $angkatan = Student::query()
-        ->where('id_lecturer', $id)
-        ->select('angkatan', DB::raw('count(*) as total'))
-        ->groupBy('angkatan')
-        ->orderBy('angkatan', 'asc')
-        ->get();
+        $students = Student::withCount('counselings')
+            ->byLecturer(Auth::id())
+            ->search($request->input('search'))
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('admin.students.index', [
+            'students' => $students,
+            'search'   => $request->input('search'),
+        ]);
+    }
+
+    public function showCardByLecture($id)
+    {
+        $student = Student::with('dosenPA')->findOrFail($id);
+
+        $history = $student->counselings()
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->map(function ($counseling) {
+                $ids = $counseling->failed_courses ?? [];
+                $counseling->failed_courses_objects = Course::whereIn('id', $ids)->get();
+                return $counseling;
+            });
+
+        return view('admin.counseling.add_form_student', compact('student', 'history'));
+    }
+
+    public function checkStudentByLecturer($id)
+    {
+        $dosen = User::findOrFail($id);
+
+        if (!in_array($dosen->role, ['admin', 'superadmin', 'masteradmin'])) {
+            return redirect()->back()->with('error', 'Dosen tidak ditemukan atau bukan dosen pembimbing.');
+        }
+
+        $angkatan = Student::byLecturer($id)
+            ->select('angkatan', DB::raw('count(*) as total'))
+            ->groupBy('angkatan')
+            ->orderBy('angkatan')
+            ->get();
 
         return view('admin.counseling.index_master', compact('angkatan', 'dosen'));
     }
 
-   public function getStudentsByBatchLecturer(Request $request, $batch, $id)
-{
-    $dosen = User::findOrFail($id);
-    $search = $request->input('search');
+    public function getStudentsByBatchLecturer(Request $request, $batch, $id)
+    {
+        $dosen = User::findOrFail($id);
 
-    $students = Student::with('counselings') // ambil semua riwayat counseling
-        ->where('id_lecturer', $id)
-        ->where('angkatan', $batch)
-        ->when($search, function ($query, $search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('nama_lengkap', 'like', "%{$search}%")
-                  ->orWhere('nim', 'like', "%{$search}%")
-                  ->orWhere('angkatan', 'like', "%{$search}%");
-            });
-        })
-        ->latest()
-        ->paginate(10)
-        ->appends(['search' => $search]);
+        $students = Student::withCount('counselings')
+            ->byLecturer($id)
+            ->byBatch($batch)
+            ->search($request->input('search'))
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
 
-    return view('admin.students.index_master', compact('students', 'dosen', 'batch'));
-}
+        return view('admin.students.index_master', compact('students', 'dosen', 'batch'));
+    }
 
-    
     public function create()
     {
-        $menu = ' add students';
-        return view('admin.students.create', compact('menu'));
+        return view('admin.students.create', [
+            'menu' => 'Add Students',
+        ]);
     }
 
-   public function store(Request $request)
-{
- 
+    public function store(Request $request)
+    {
+        $student = Student::create(array_merge(
+            $request->validated(),
+            [
+                'id_lecturer'      => Auth::id(),
+                'program_studi'    => Student::DEFAULT_PROGRAM,
+                'status_mahasiswa' => Student::STATUS_ACTIVE,
+                'tanggal_masuk'    => now(),
+            ]
+        ));
 
-$validator = Validator::make($request->all(), [
-    'full_name' => 'required|string|max:100',                     
-    'nim'       => 'required|string|unique:students,nim|max:12',  
-    'batch'     => 'required|integer|min:1900|max:2100',          
-    'gender'    => 'nullable|in:L,P',
-    'address'   => 'nullable|string|max:500',                    
-    'notes'     => 'nullable|string|max:1000',                   
-], [
-    // Custom messages
-    'full_name.required' => 'Full name cannot be empty.',
-    'nim.required'       => 'NIM cannot be empty.',
-    'nim.unique'         => 'This NIM is already registered, please use another one.',
-    'batch.required'     => 'Batch cannot be empty.',
-]);
-
-
-    if ($validator->fails()) {
-        return redirect()->back()->withErrors($validator)->withInput();
+        return redirect()->route('admin.students.index')
+            ->with('success', "Mahasiswa {$student->nama_lengkap} berhasil ditambahkan.");
     }
 
-    
-    $studentData = $request->only([
-        'full_name', 
-        'nim', 
-        'batch', 
-        'major', 
-        'email', 
-        'phone', 
-        'notes',
-        'gender',
-        'address'
-    ]);
-
-  
-     $studentData = [
-        'id_lecturer'       => auth()->user()->id, 
-        'nama_lengkap'      => $studentData['full_name'],
-        'nim'               => $studentData['nim'],
-        'angkatan'          => $studentData['batch'],
-        'program_studi'     => 'Bisnis Digital', // default
-        'email'             => $studentData['email'],
-        'no_telepon'        => $studentData['phone'],
-        'notes'             => $studentData['notes'],
-        'jenis_kelamin'     => $studentData['gender'],
-        'alamat'            => $studentData['address'],
-        'status_mahasiswa'  => 'Aktif', // default
-        'tanggal_masuk'     => now(),   // set tanggal masuk sesuai saat ini
-    ];
-
-  
-    Student::create($studentData);
-
-    return redirect()->route('admin.students.index')->with('success', 'Mahasiswa berhasil ditambahkan.');
-}
-
-
-    /**
-     * Display the specified student.
-     */
     public function show(Student $student)
     {
         return view('admin.students.show', compact('student'));
     }
 
-    /**
-     * Show the form for editing the specified student.
-     */
-    public function edit ($id)
+    public function edit(Student $student)
     {
-        $student = Student::where('id',$id)->first();
-        $menu  = 'Edit '. $student->nama_lengkap;
-        
-        return view('admin.students.edit', compact('student','menu'));
+        return view('admin.students.edit', [
+            'student' => $student,
+            'menu'    => "Edit {$student->nama_lengkap}",
+        ]);
     }
 
-    /**
-     * Update the specified student in storage.
-     */
-    public function update(Request $request, $id)
+    public function update(\App\Http\Requests\UpdateStudentRequest $request, Student $student)
     {
-          // Validasi input
-    $validator = Validator::make($request->all(), [
-        'nama_lengkap'   => 'required|string|max:100',
-        'nim'            => 'required|string|max:12|unique:students,nim,' . $id,
-        'angkatan'       => 'required|integer|min:1900|max:2100',
-        'program_studi'  => 'required|string|max:50',
-        'fakultas'       => 'nullable|string|max:100',
-        'jenis_kelamin'  => 'required|in:L,P',
-        'alamat'         => 'required|string|max:500',
-        'email'          => 'nullable|email|max:100|unique:students,email,' . $id,
-        'no_telepon'     => 'nullable|string|max:15',
-        'notes'          => 'nullable|string|max:1000',
-    ]);
+        $student->update($request->validated() + [
+            'status_mahasiswa' => Student::STATUS_ACTIVE,
+        ]);
 
-    if ($validator->fails()) {
-        return redirect()->back()
-            ->withErrors($validator)
-            ->withInput();
+        return redirect()->back()->with('success', 'Data mahasiswa berhasil diperbarui!');
     }
 
-    $studentData = $validator->validated();
+    public function destroy(Student $student)
+    {
+        $student->delete();
 
-    // Tambahkan default jika perlu
-    $studentData['status_mahasiswa'] = 'Aktif';
-    $studentData['tanggal_masuk']    = now();
-
-    // Update ke database dengan where id
-    Student::where('id', $id)->update($studentData);
-
-    return redirect()->back()
-        ->with('success', 'Data mahasiswa berhasil diperbarui!');
+        return redirect()->route('admin.students.index')
+            ->with('success', 'Mahasiswa berhasil dihapus!');
     }
-
-    /**
-     * Remove the specified student from storage.
-     */
-    public function destroy($id)
-{
-    $student = Student::findOrFail($id); 
-    $student->delete();
-
-    return redirect()->route('admin.students.index')
-        ->with('success', 'Mahasiswa berhasil dihapus!');
-}
-
 }

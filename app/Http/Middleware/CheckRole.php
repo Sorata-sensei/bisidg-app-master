@@ -21,6 +21,6 @@ class CheckRole
             return $next($request);
         }
 
-        return redirect()->route('login')->with('error', 'You do not have access.');
+        return redirect()->route('auth.login')->with('error', 'You do not have access.');
     }
 }

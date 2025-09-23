@@ -8,6 +8,7 @@ use App\Models\Faq;
 use App\Models\StudentInternship;
 class CampusController extends Controller
 {
+    // belum terpakai
    public function index()
     {
         $menu = 'Campus';

@@ -188,8 +188,8 @@
                                 <th>Nama Lengkap</th>
                                 <th>NIM</th>
                                 <th>Angkatan</th>
-                                <th>Jurusan</th>
-                                <th>Email</th>
+                                {{-- <th>Jurusan</th>
+                                <th>Email</th> --}}
                                 <th>Jenis Kelamin</th>
                                 <th>Maps</th>
                                 <th>Notes</th>
@@ -209,8 +209,8 @@
                                     <td><strong>{{ Str::limit($student->nama_lengkap, 40) }}</strong></td>
                                     <td class="text-muted font-monospace">{{ $student->nim }}</td>
                                     <td><span class="badge badge-success">{{ $student->angkatan }}</span></td>
-                                    <td>{{ $student->program_studi }}</td>
-                                    <td>{{ $student->email ?? 'belum ada' }}</td>
+                                    {{-- <td>{{ $student->program_studi }}</td>
+                                    <td>{{ $student->email ?? 'belum ada' }}</td> --}}
                                     <td>
                                         <span
                                             class="badge {{ $student->jenis_kelamin === 'L' ? 'bg-primary text-white' : 'bg-danger  text-white' }}">

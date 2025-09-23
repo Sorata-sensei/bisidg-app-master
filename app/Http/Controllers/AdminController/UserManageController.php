@@ -3,97 +3,114 @@
 namespace App\Http\Controllers\AdminController;
 
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
 use App\Http\Controllers\Controller;
+
 class UserManageController extends Controller
 {
-     public function index(){
-      $menu = 'User';
-    $user = User::where('name', Auth::user()->name)->first();
-    $cvPath = asset('storage/' . $user->cv);
-    $encryptedUrl = Crypt::encrypt($cvPath);
-     return view('admin.user.index', compact('user', 'encryptedUrl','menu'));
-   }
-
-   public function indexMain(){
-     
-      $users = User::all();
-     return view('admin.user.main', compact('users'));
-   }
-  public function create()
-{
-    // kirim instance kosong supaya $user selalu ada di Blade
-    return view('admin.user.create', [
-        'user' => new User(),   // <- penting
-    ]);
-}
-
-public function edit($id)
-{
-    $user = User::findOrFail($id);
-    return view('admin.user.edit', compact('user'));
-}
-public function store(Request $request)
-{
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email',
-        'username' => 'nullable|string|unique:users,username',
-        'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-        'ttd' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-    ]);
-
-    $user = new User();
-    $user->name = $request->name;
-    $user->email = $request->email;
-    $user->username = $request->username;
-    $user->NIDNorNUPTK = $request->NIDNorNUPTK;
-    $user->role = $request->role ?? 'admin';
-    $user->password = bcrypt('USHBISDIG9599');
-
-    if ($request->hasFile('photo')) {
-        $user->photo = $request->file('photo')->store('users/photo', 'public');
-    }
-    if ($request->hasFile('ttd')) {
-        $user->ttd = $request->file('ttd')->store('users/ttd', 'public');
+    /**
+     * Tampilkan profil user yang sedang login
+     */
+    public function index()
+    {
+        $user = Auth::user();
+        return view('admin.user.index', compact('user'));
     }
 
-    $user->save();
-
-    return redirect()->route('user.admin.main')->with('success', 'User berhasil ditambahkan');
-}
-
-public function update(Request $request, $id)
-{
-    $user = User::findOrFail($id);
-
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email,' . $user->id,
-        'username' => 'nullable|string|unique:users,username,' . $user->id,
-        'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-        'ttd' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-    ]);
-
-    $user->fill($request->only('name','email','username','NIDNorNUPTK','role'));
-
-    if ($request->hasFile('photo')) {
-        if ($user->photo) Storage::disk('public')->delete($user->photo);
-        $user->photo = $request->file('photo')->store('users/photo', 'public');
-    }
-    if ($request->hasFile('ttd')) {
-        if ($user->ttd) Storage::disk('public')->delete($user->ttd);
-        $user->ttd = $request->file('ttd')->store('users/ttd', 'public');
+    /**
+     * Tampilkan semua user
+     */
+    public function indexMain()
+    {
+        $users = User::all();
+        return view('admin.user.main', compact('users'));
     }
 
-    $user->save();
+    /**
+     * Form tambah user
+     */
+    public function create()
+    {
+        return view('admin.user.create', [
+            'user' => new User(), // instance kosong supaya Blade tidak error
+        ]);
+    }
 
-    return redirect()->route('user.admin.index')->with('success', 'User berhasil diperbarui');
-}
+    /**
+     * Form edit user
+     */
+    public function edit($id)
+    {
+        $user = User::findOrFail($id);
+        return view('admin.user.edit', compact('user'));
+    }
 
+    /**
+     * Simpan user baru
+     */
+    public function store(Request $request)
+    {
+        $request->validate($this->rules());
+
+        $user = new User($request->only(['name', 'email', 'username', 'NIDNorNUPTK', 'role']));
+        $user->role = $request->role ?? 'admin';
+        $user->password = bcrypt('USHBISDIG9599'); // password default hardcoded
+
+        $user->photo = $this->handleUpload($request, 'photo', null, 'users/photo');
+        $user->ttd   = $this->handleUpload($request, 'ttd', null, 'users/ttd');
+
+        $user->save();
+
+        return redirect()->route('user.admin.main')->with('success', 'User berhasil ditambahkan');
+    }
+
+    /**
+     * Update data user
+     */
+    public function update(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $request->validate($this->rules($user->id));
+
+        $user->fill($request->only('name', 'email', 'username', 'NIDNorNUPTK', 'role'));
+
+        $user->photo = $this->handleUpload($request, 'photo', $user->photo, 'users/photo');
+        $user->ttd   = $this->handleUpload($request, 'ttd', $user->ttd, 'users/ttd');
+
+        $user->save();
+
+        return redirect()->route('user.admin.index')->with('success', 'User berhasil diperbarui');
+    }
+
+    /**
+     * Validasi rules (bisa dipakai store & update)
+     */
+    private function rules($id = null): array
+    {
+        return [
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users,email,' . ($id ?? 'NULL') . ',id',
+            'username' => 'nullable|string|unique:users,username,' . ($id ?? 'NULL') . ',id',
+            'photo'    => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'ttd'      => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ];
+    }
+
+    /**
+     * Handle upload file dengan hapus file lama (kalau ada)
+     */
+    private function handleUpload(Request $request, string $field, ?string $oldFile, string $path): ?string
+    {
+        if ($request->hasFile($field)) {
+            if ($oldFile) {
+                Storage::disk('public')->delete($oldFile);
+            }
+            return $request->file($field)->store($path, 'public');
+        }
+        return $oldFile;
+    }
 }

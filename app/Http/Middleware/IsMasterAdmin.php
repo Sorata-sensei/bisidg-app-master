@@ -20,7 +20,7 @@ class IsMasterAdmin
              return $next($request);
         }
 
-        return redirect()->route('login')->with('error','You have not admin access');
+        return redirect()->route('auth.login')->with('error','You have not admin access');
       // It will redirect user back to home screen if they do not have is_admin=1 assigned in database
     }
 }

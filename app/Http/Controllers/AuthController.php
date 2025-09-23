@@ -8,81 +8,88 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
+    /**
+     * Halaman login utama
+     */
     public function index()
     {
         if (Auth::guard('student')->check()) {
-            return redirect('/student/personal');
+            return redirect()->route('student.personal.index');
         }
-        if (auth()->check()) {
-            if (auth()->user()->role == 'admin') {
-                return redirect('/admin/dashboard');
-            } elseif (auth()->user()->role == 'superadmin') {
-                return redirect('/admin/dashboard');
-            } elseif (auth()->user()->role == 'masteradmin') {
-                return redirect('/admin/dashboard');
+
+        if (Auth::check()) {
+            $role = Auth::user()->role;
+            if (in_array($role, ['admin', 'superadmin', 'masteradmin'])) {
+                return redirect()->route('dashboard.admin.index');
             }
         }
+
         return view('auth.login');
     }
 
+    /**
+     * Login untuk Dosen/Admin
+     */
     public function loginDosen(Request $request)
     {
         $credentials = $request->validate([
-            'email' => 'required|string|email',
+            'email'    => 'required|string|email',
             'password' => 'required|string',
-            // 'g-recaptcha-response' => 'required|string', // matikan captcha
         ]);
 
-        // captcha dimatikan
-        // if (!$this->validateRecaptcha($request->input('g-recaptcha-response'), 'login_dosen')) {
-        //     return back()->withErrors(['captcha' => 'Captcha validation failed, try again.'])->withInput();
-        // }
-
-        if (auth()->attempt($request->only('email', 'password'))) {
+        if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->intended('/admin/dashboard');
+            return redirect()->intended(route('dashboard.admin.index'));
         }
 
-        return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ])->onlyInput('email');
+        return back()
+            ->withErrors(['email' => 'Email atau Password tidak sesuai.'])
+            ->onlyInput('email');
     }
 
+    /**
+     * Login untuk Mahasiswa
+     */
     public function loginMahasiswa(Request $request)
     {
-        $request->validate([
-            'nim' => 'required|string',
+        $credentials = $request->validate([
+            'nim'      => 'required|string',
             'password' => 'required|string',
-            // 'g-recaptcha-response' => 'required|string', // matikan captcha
         ]);
-
-        // captcha dimatikan
-        // if (!$this->validateRecaptcha($request->input('g-recaptcha-response'), 'login_mahasiswa')) {
-        //     return back()->withErrors(['captcha' => 'Captcha validation failed, try again.'])->withInput();
-        // }
-
-        $credentials = $request->only('nim', 'password');
 
         if (Auth::guard('student')->attempt($credentials)) {
             $request->session()->regenerate();
 
             $student = Auth::guard('student')->user();
-            $request->session()->put('student_id', encrypt($student->id));
-            $request->session()->put('path_pic', $student->foto ?? '0');
-            $request->session()->put('student_nama', $student->nama_lengkap ?? null);
-            $request->session()->put('nim', $student->nim ?? null);
+            $request->session()->put([
+                'student_id'    => encrypt($student->id),
+                'path_pic'      => $student->foto ?? '0',
+                'student_nama'  => $student->nama_lengkap ?? null,
+                'nim'           => $student->nim ?? null,
+            ]);
 
-            return redirect()->intended('/student/personal');
+            return redirect()->intended(route('student.personal.index'));
         }
 
-        return back()->with('error', 'NIM atau Password salah.')->withInput();
+        return back()
+            ->with('error', 'NIM atau Password salah.')
+            ->withInput();
     }
 
+    /**
+     * Logout user (dosen/admin/mahasiswa)
+     */
     public function logout(Request $request)
     {
-        auth()->logout();
+        if (Auth::guard('student')->check()) {
+            Auth::guard('student')->logout();
+        } else {
+            Auth::logout();
+        }
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect('/');
     }
 }
