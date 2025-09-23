@@ -4,16 +4,20 @@ namespace App\Http\Controllers\AdminController;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Counseling;
 use App\Models\Student;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CounselingController extends Controller
 {
+    /**
+     * Menampilkan daftar angkatan mahasiswa bimbingan dosen.
+     */
     public function index()
     {
-        $angkatan = Student::byLecturer(Auth::id())
-            ->select('angkatan')
-            ->selectRaw('count(*) as total')
+        $angkatan = Student::where('id_lecturer', Auth::id())
+            ->select('angkatan', DB::raw('count(*) as total'))
             ->groupBy('angkatan')
             ->orderBy('angkatan', 'asc')
             ->get();
@@ -21,44 +25,61 @@ class CounselingController extends Controller
         return view('admin.counseling.index', compact('angkatan'));
     }
 
+    /**
+     * Menampilkan mahasiswa per angkatan.
+     */
     public function getStudentsByBatch($batch, Request $request)
     {
+        $search = $request->input('search');
+
         $students = Student::withCount('counselings')
-            ->byLecturer(Auth::id())
-            ->byBatch($batch)
-            ->search($request->input('search'))
+            ->where('id_lecturer', Auth::id())
+            ->where('angkatan', $batch)
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('nama_lengkap', 'like', "%{$search}%")
+                        ->orWhere('nim', 'like', "%{$search}%")
+                        ->orWhere('angkatan', 'like', "%{$search}%");
+                });
+            })
             ->latest()
             ->paginate(10)
-            ->withQueryString();
+            ->appends(['search' => $search]);
 
         return view('admin.students.index', compact('students', 'batch'));
     }
 
+    /**
+     * Form tambah counseling mahasiswa.
+     */
     public function counselingAdd()
     {
-        $students = Student::where('is_counseling', false)->get();
+        $students = Student::where('is_counseling', 0)->get();
+
         return view('students.counseling.add_form_student', compact('students'));
     }
 
-    public function toggleCounseling($id)
+    /**
+     * Toggle status counseling mahasiswa.
+     */
+    public function openClose($id)
     {
-        return $this->toggleStatus($id, 'is_counseling', 'Status counseling berhasil diubah.');
-    }
+        $student = Student::findOrFail($id);
+        $student->is_counseling = $student->is_counseling ? 0 : 1;
+        $student->save();
 
-    public function toggleEdit($id)
-    {
-        return $this->toggleStatus($id, 'is_edited', 'Status Edit Data berhasil diubah.');
+        return redirect()->back()->with('success', 'Status counseling berhasil diubah.');
     }
 
     /**
-     * Helper untuk toggle boolean field di Student
+     * Toggle status edit data mahasiswa.
      */
-    protected function toggleStatus($id, $field, $message)
+    public function openCloseEdit($id)
     {
         $student = Student::findOrFail($id);
-        $student->$field = !$student->$field;
+        $student->is_edited = $student->is_edited ? 0 : 1;
         $student->save();
 
-        return redirect()->back()->with('success', $message);
+        return redirect()->back()->with('success', 'Status Edit Data berhasil diubah.');
     }
 }
