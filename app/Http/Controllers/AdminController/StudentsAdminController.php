@@ -103,8 +103,9 @@ class StudentsAdminController extends Controller
         return view('admin.students.show', compact('student'));
     }
 
-    public function edit(Student $student)
+    public function edit($id)
     {
+        $student = Student::findOrFail($id);
         return view('admin.students.edit', [
             'student' => $student,
             'menu'    => "Edit {$student->nama_lengkap}",
