@@ -99,7 +99,6 @@
             min-height: 80px !important;
         }
 
-        /* Animasi pulse untuk ikon warning */
         @keyframes pulse {
             0% {
                 transform: scale(1);
@@ -117,7 +116,6 @@
             }
         }
 
-        /* Supaya modal animasi fadeIn dan fadeOut */
         .modal.animate__animated .modal-content {
             animation-duration: 0.4s;
         }
@@ -144,7 +142,6 @@
 
 
         <div class="d-flex justify-content-between align-items-center mb-4">
-
             <a href="{{ route('admin.students.create') }}" class="btn btn-primary btn-lg shadow">
                 <i class="fas fa-plus-circle me-2"></i> Add New Student
             </a>
@@ -188,8 +185,6 @@
                                 <th>Nama Lengkap</th>
                                 <th>NIM</th>
                                 <th>Angkatan</th>
-                                {{-- <th>Jurusan</th>
-                                <th>Email</th> --}}
                                 <th>Jenis Kelamin</th>
                                 <th>Maps</th>
                                 <th>Notes</th>
@@ -198,7 +193,6 @@
                                     <th>Counseling</th>
                                     <th>Edit Request Approval</th>
                                 @endif
-
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -209,8 +203,6 @@
                                     <td><strong>{{ Str::limit($student->nama_lengkap, 40) }}</strong></td>
                                     <td class="text-muted font-monospace">{{ $student->nim }}</td>
                                     <td><span class="badge badge-success">{{ $student->angkatan }}</span></td>
-                                    {{-- <td>{{ $student->program_studi }}</td>
-                                    <td>{{ $student->email ?? 'belum ada' }}</td> --}}
                                     <td>
                                         <span
                                             class="badge {{ $student->jenis_kelamin === 'L' ? 'bg-primary text-white' : 'bg-danger  text-white' }}">
@@ -260,8 +252,6 @@
                                             </div>
                                         </td>
                                         <td>
-
-
                                             <div class="d-flex flex-wrap gap-2">
                                                 @if ($student->is_edited == 0)
                                                     <a href="{{ route('admin.counseling.opencloseedit', $student->id) }}"
@@ -274,20 +264,27 @@
                                                         <i class="fas fa-minus-circle me-1"></i> Closed
                                                     </a>
                                                 @endif
-
                                             </div>
                                         </td>
                                     @endif
                                     <td>
-                                        <a href="{{ route('admin.students.edit', $student->id) }}"
-                                            class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
-                                            data-bs-target="#deleteModal" data-id="{{ $student->id }}"
-                                            data-name="{{ $student->nama_lengkap }}">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            <a href="{{ route('admin.students.edit', $student->id) }}"
+                                                class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                                data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                                data-id="{{ $student->id }}" data-name="{{ $student->nama_lengkap }}">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                            <!-- Tombol reset password -->
+                                            <button type="button" class="btn btn-sm btn-outline-warning"
+                                                data-bs-toggle="modal" data-bs-target="#resetPasswordModal"
+                                                data-id="{{ $student->id }}" data-name="{{ $student->nama_lengkap }}">
+                                                <i class="fas fa-key"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
@@ -359,6 +356,31 @@
                 <div class="modal-footer justify-content-center">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content animate__animated">
+                <form id="resetPasswordForm" method="GET">
+                    <div class="modal-header bg-warning text-dark">
+                        <h5 class="modal-title"><i class="fas fa-key me-2"></i> Reset Password</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <i class="fas fa-key text-warning mb-3"
+                            style="font-size: 4rem; animation: pulse 1.2s infinite;"></i>
+                        <p class="mb-1">Apakah Anda yakin ingin mereset password <br><strong
+                                id="resetStudentName"></strong>?</p>
+                        <small class="text-danger">Password baru akan menjadi <b>Bisdig2025</b></small>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-warning">Ya, Reset</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -440,6 +462,18 @@
                     document.getElementById('notesStudentName').textContent = studentName;
                     document.getElementById('notesContent').innerHTML = notes ?
                         notes : '<span class="text-muted">Tidak ada catatan</span>';
+                }
+            });
+
+            // Reset Password Modal
+            attachModalAnimation('resetPasswordModal', function(event, modal) {
+                if (modal.id === 'resetPasswordModal' && event.relatedTarget) {
+                    const btn = event.relatedTarget;
+                    const studentId = btn.getAttribute('data-id');
+                    const studentName = btn.getAttribute('data-name');
+                    document.getElementById('resetStudentName').textContent = studentName;
+                    document.getElementById('resetPasswordForm').action =
+                        "{{ url('admin/students') }}/" + studentId + "/resetpassword";
                 }
             });
         });

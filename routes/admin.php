@@ -85,7 +85,7 @@ Route::middleware(['auth', 'role:admin,superadmin,masteradmin'])->group(function
             Route::get('/{id}/edit', 'edit')->name('edit');
             Route::put('/{id}', 'update')->name('update');
             Route::delete('/{id}', 'destroy')->name('destroy');
-
+            Route::get('/{id}/resetpassword', 'resetpassword')->name('resetpassword');
             // Tambahan spesifik
             Route::get('/CheckStudentByLecturer/{id}', 'CheckStudentByLecturer')->name('CheckStudentByLecturer');
             Route::get('/showCardByLecture/{id}', 'showCardByLecture')->name('showCardByLecture');
