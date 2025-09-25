@@ -84,7 +84,10 @@ Route::middleware(['auth', 'role:admin,superadmin,masteradmin'])->group(function
             Route::post('/', 'store')->name('store');
             Route::get('/{id}/edit', 'edit')->name('edit');
             Route::put('/{id}', 'update')->name('update');
+            Route::get('/{id}/editcard', 'editcard')->name('editcard');
+            Route::put('/{id}/updatecard', 'updatecard')->name('updatecard');
             Route::delete('/{id}', 'destroy')->name('destroy');
+            Route::delete('/{id}/deletecard', 'destroycard')->name('deletecard');
             Route::get('/{id}/resetpassword', 'resetpassword')->name('resetpassword');
             // Tambahan spesifik
             Route::get('/CheckStudentByLecturer/{id}', 'CheckStudentByLecturer')->name('CheckStudentByLecturer');

@@ -211,8 +211,83 @@ class StudentsAdminController extends Controller
         return redirect()->back()
             ->with('success', 'Data mahasiswa berhasil diperbarui!');
     }
+    // Show edit counseling card form
+     public function editcard($id)
+    {
+        $row = CardCounseling::findOrFail($id);
+        $student = $row->student;
+        $allCourses = Course::orderBy('code_prefix')->orderBy('code_number')->get();
+        
+        return view('admin.counseling.card_counseling_edit', compact('row', 'student', 'allCourses'));
+    }
+    // Update counseling card
+    public function updatecard(Request $request, $id)
+    {
+        $row = CardCounseling::findOrFail($id);
+      
+       $validator = Validator::make(
+        $request->all(),
+        [
+            'semester'   => 'required|string|max:20',
+            'sks'        => 'required|integer|min:0',
+            'ip'         => 'required|numeric|between:0,4',
+            'tanggal'    => 'required|date',
+            'komentar'   => 'nullable|string|max:500',
+            'failed_courses'     => 'array',
+            'failed_courses.*'   => 'exists:courses,id',
+            'retaken_courses'    => 'array',
+            'retaken_courses.*'  => 'exists:courses,id',
+        ],
+        [
+            'semester.required'  => 'Semester wajib diisi.',
+            'semester.max'       => 'Semester maksimal 20 karakter.',
+            
+            'sks.required'       => 'Jumlah SKS tidak boleh kosong.',
+            'sks.integer'        => 'SKS harus berupa angka bulat.',
+            'sks.min'            => 'SKS minimal 0.',
+
+            'ip.required'        => 'IP Semester Lalu wajib diisi.',
+            'ip.numeric'         => 'IP harus berupa angka.',
+            'ip.between'         => 'IP harus antara 0.00 sampai 4.00.',
+
+            'tanggal.required'   => 'Tanggal konsultasi wajib diisi.',
+            'tanggal.date'       => 'Format tanggal tidak valid.',
+
+            'komentar.string'    => 'Komentar harus berupa teks.',
+            'komentar.max'       => 'Komentar maksimal 500 karakter.',
+
+            'failed_courses.array'     => 'Format mata kuliah tidak lulus tidak valid.',
+            'failed_courses.*.exists'  => 'Mata kuliah yang dipilih tidak ditemukan di database.',
+
+            'retaken_courses.array'     => 'Format mata kuliah diulang tidak valid.',
+            'retaken_courses.*.exists'  => 'Mata kuliah yang dipilih tidak ditemukan di database.',
+        ]
+    );
 
 
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        DB::transaction(function () use ($request, $row) {
+            $row->semester = $request->semester;
+            $row->sks      = $request->sks;
+            $row->ip       = $request->ip;
+            $row->tanggal  = $request->tanggal;
+            $row->komentar = $request->komentar;
+
+            // simpan langsung array ke kolom JSON
+            $row->failed_courses  = $request->failed_courses ?? [];
+            $row->retaken_courses = $request->retaken_courses ?? [];
+
+            $row->save();
+        });
+
+
+        return redirect()
+            ->route('admin.students.showCardByLecture', $row->id_student)
+            ->with('success', 'Data konsultasi berhasil diperbarui.');
+    }
     /**
      * Reset a student's password to default.
      */    
@@ -234,5 +309,14 @@ class StudentsAdminController extends Controller
 
         return redirect()->route('admin.students.index')
             ->with('success', 'Mahasiswa berhasil dihapus!');
+    }
+
+    public function destroycard($id)
+    {
+        $card = CardCounseling::findOrFail($id);
+        $card->delete();
+
+        return redirect()->back()
+            ->with('success', 'Kartu konsultasi berhasil dihapus!');
     }
 }
