@@ -28,4 +28,15 @@ class Course extends Model
     {
         return $this->code_prefix . $this->code_number;
     }
+
+
+    public function failedInCounselings()
+    {
+        return $this->belongsToMany(CardCounseling::class, 'failed_courses');
+    }
+
+    public function retakenInCounselings()
+    {
+        return $this->belongsToMany(CardCounseling::class, 'retaken_courses');
+    }
 }

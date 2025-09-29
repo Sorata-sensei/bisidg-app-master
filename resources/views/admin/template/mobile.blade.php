@@ -8,13 +8,13 @@
                 <span>Dashboard</span>
             </a>
         </li>
-        <li class="mobile-nav-item">
+        {{-- <li class="mobile-nav-item">
             <a href="{{ route('admin.students.index') }}"
                 class="mobile-nav-link {{ request()->is('admin/students') ? 'active' : '' }} {{ request()->is('admin/students/create') ? 'active' : '' }}">
                 <i class="fa-solid fa-users mobile-nav-icon"></i>
                 <span>Students</span>
             </a>
-        </li>
+        </li> --}}
         <li class="mobile-nav-item">
             <a href="{{ route('admin.counseling.index') }}"
                 class="mobile-nav-link {{ request()->is('admin/counseling') ? 'active' : '' }}">

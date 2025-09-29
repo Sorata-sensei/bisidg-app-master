@@ -12,13 +12,13 @@
                     Dashboard
                 </a>
             </li>
-            <li class="nav-item">
+            {{-- <li class="nav-item">
                 <a href="{{ route('admin.students.index') }}"
                     class="nav-link {{ request()->is('admin/students') ? 'active' : '' }} {{ request()->is('admin/students/create') ? 'active' : '' }}">
                     <i class="fa-solid fa-users nav-icon"></i>
                     Students
                 </a>
-            </li>
+            </li> --}}
             <li class="nav-item">
                 <a href="{{ route('admin.counseling.index') }}"
                     class="nav-link {{ request()->is('admin/counseling') ? 'active' : '' }}">

@@ -57,6 +57,7 @@ Route::middleware(['auth', 'role:admin,superadmin,masteradmin'])->group(function
         ->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('/get-students/{batch}', 'getStudentsByBatch')->name('getStudentsByBatch');
+            Route::get('/get-course/failorretakecourse/{batch}', 'getStudentsByBatchByCourse')->name('getStudentsByBatchByCourse');
             Route::get('/open-close/{id}', 'openclose')->name('openclose');
             Route::get('/open-close/data/{id}', 'opencloseedit')->name('opencloseedit');
         });

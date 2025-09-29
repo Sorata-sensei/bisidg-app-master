@@ -49,6 +49,23 @@ class CounselingController extends Controller
         return view('admin.students.index', compact('students', 'batch'));
     }
 
+    public function getStudentsByBatchByCourse(Request $request, $batch)
+    {
+        $students = Student::with(['counselings'])
+        ->where('id_lecturer', Auth::id())
+        ->where('angkatan', $batch)
+        ->get();
+
+        $students->map(function ($student) {
+            $student->counselings->map(function ($counseling) {
+                $counseling->failed_courses_detail  = $counseling->failed_courses_objects;
+                $counseling->retaken_courses_detail = $counseling->retaken_courses_objects;
+            });
+            return $student;
+        });
+       
+        return view('admin.counseling.course-failorretake', compact('students'));
+    }
     /**
      * Form tambah counseling mahasiswa.
      */
