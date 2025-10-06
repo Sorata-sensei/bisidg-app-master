@@ -2,6 +2,11 @@
 
 @push('css')
     <style>
+        .bg-pink {
+            background-color: #FF69B4;
+            color: #FFFFFF;
+        }
+
         .card {
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
@@ -181,9 +186,9 @@
                                 <th>Total Counseling</th>
                                 @if (request()->is('admin/counseling/get-students/*'))
                                     <th>Counseling</th>
-                                    <th>Edit Request Approval</th>
+                                    <th>Edit Request Profile</th>
                                 @endif
-                                <th>Aksi</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -195,7 +200,7 @@
                                     <td><span class="badge badge-success">{{ $student->angkatan }}</span></td>
                                     <td>
                                         <span
-                                            class="badge {{ $student->jenis_kelamin === 'L' ? 'bg-primary text-white' : 'bg-danger  text-white' }}">
+                                            class="badge {{ $student->jenis_kelamin === 'L' ? 'bg-primary text-white' : 'bg-pink  text-white' }}">
                                             {{ $student->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}
                                         </span>
                                     </td>
@@ -223,10 +228,10 @@
                                     </td>
                                     @if (request()->is('admin/counseling/get-students/*'))
                                         <td>
-                                            <div class="d-flex flex-wrap gap-2">
+                                            <div class="btn-group" role="group" aria-label="Basic example">
                                                 @if ($student->is_counseling == 0)
                                                     <a href="{{ route('admin.counseling.openclose', $student->id) }}"
-                                                        class="btn btn-sm btn-primary">
+                                                        class="btn btn-sm btn-success">
                                                         <i class="fas fa-plus-circle me-1"></i> Open
                                                     </a>
                                                 @else
@@ -242,7 +247,7 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <div class="d-flex flex-wrap gap-2">
+                                            <div class="btn-group" role="group" aria-label="Basic example">
                                                 @if ($student->is_edited == 0)
                                                     <a href="{{ route('admin.counseling.opencloseedit', $student->id) }}"
                                                         class="btn btn-sm btn-primary">
@@ -258,7 +263,7 @@
                                         </td>
                                     @endif
                                     <td>
-                                        <div class="d-flex flex-wrap gap-2">
+                                        <div class="btn-group" role="group" aria-label="Basic example">
                                             <a href="{{ route('admin.students.edit', $student->id) }}"
                                                 class="btn btn-sm btn-outline-primary">
                                                 <i class="fas fa-edit"></i>

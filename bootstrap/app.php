@@ -3,6 +3,8 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Auth\Middleware\Authenticate;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -11,14 +13,21 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-    $middleware->alias([
-        'admin' => \App\Http\Middleware\IsAdmin::class,
-        'superadmin' => \App\Http\Middleware\IsSuperAdmin::class,
-        'masteradmin' => \App\Http\Middleware\IsMasterAdmin::class,
-        'student' => \App\Http\Middleware\EnsureStudentAuthenticated::class,
-        'role' => \App\Http\Middleware\CheckRole::class,
-    ]);
-})
+        // Daftar alias middleware kustom kamu
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\IsAdmin::class,
+            'superadmin' => \App\Http\Middleware\IsSuperAdmin::class,
+            'masteradmin' => \App\Http\Middleware\IsMasterAdmin::class,
+            'student' => \App\Http\Middleware\EnsureStudentAuthenticated::class,
+            'role' => \App\Http\Middleware\CheckRole::class,
+        ]);
+
+       
+        Authenticate::redirectUsing(function (Request $request) {
+            return route('auth.login');
+        });
+    })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
-    })->create();
+    })
+    ->create();
