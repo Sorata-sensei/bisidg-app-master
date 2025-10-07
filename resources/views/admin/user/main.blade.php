@@ -81,7 +81,19 @@
             <div class="col-xl-3 col-md-6 mb-4">
                 <a href="{{ route('admin.students.CheckStudentByLecturer', $user->id) }}" class="text-decoration-none">
                     <div class="profile-card">
-                        <img src="{{ asset('storage/' . $user->photo) }}" alt="{{ $user->name }}">
+                        @php
+                            // Hapus gelar (semua teks setelah koma pertama)
+                            $cleanName = preg_replace('/,.*$/', '', $user->name);
+
+                            // Cek apakah user punya foto di storage
+                            $photoUrl = !empty($user->photo)
+                                ? asset('storage/' . $user->photo)
+                                : 'https://ui-avatars.com/api/?name=' .
+                                    urlencode(trim($cleanName)) .
+                                    '&size=256&background=random';
+                        @endphp
+
+                        <img src="{{ $photoUrl }}" alt="{{ $user->name }}">
                         <div class="profile-info">
                             <h6>{{ $user->name }}</h6>
                             <span>Dosen Pembimbing</span>
