@@ -9,7 +9,7 @@
     <main class="main-content">
         <header class="header">
             <div>
-                <h2>Selamat {{ $greeting }}</h2>
+                <h2> Selamat {{ $greeting }} {{ ucfirst(explode(' ', trim(auth()->user()->name))[0]) }}</h2>
             </div>
 
             <div class="user-profile">
@@ -30,7 +30,7 @@
                 <div class="dropdown">
                     <a class="btn  dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                         aria-expanded="false">
-                        {{ auth()->user()->name }}
+                        Menu
                     </a>
 
                     <ul class="dropdown-menu">
