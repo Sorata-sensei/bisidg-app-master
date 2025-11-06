@@ -21,7 +21,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'photo'
+        'photo',
+        'program_studi',
+        'role',
     ];
 
     /**
@@ -45,5 +47,13 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Relasi: User (Dosen PA) memiliki banyak mahasiswa
+     */
+    public function students()
+    {
+        return $this->hasMany(Student::class, 'id_lecturer', 'id');
     }
 }

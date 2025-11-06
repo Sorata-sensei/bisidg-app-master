@@ -35,7 +35,8 @@
 
                     <ul class="dropdown-menu">
                         <li><a href="{{ route('user.admin.index') }}" class="dropdown-item">Profile</a></li>
-                        <li><a class="dropdown-item" href="{{ route('auth.logout') }}">Logout</a></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}">SuperApps Dashboard</a></li>
+
                     </ul>
                 </div>
             </div>

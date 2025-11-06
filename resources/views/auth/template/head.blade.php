@@ -13,21 +13,43 @@
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('public/icon.png') }}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts - Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            /* Primary Colors - USH Theme */
+            --primary-orange: #FF9800;
+            --primary-blue: #29375d;
+            --primary-yellow: #FFC107;
+            
+            /* Gradients */
+            --primary-gradient: linear-gradient(135deg, #FF9800 0%, #FFB347 100%);
+            --secondary-gradient: linear-gradient(135deg, #29375d 0%, #3d4f7a 100%);
+            --success-gradient: linear-gradient(135deg, #5B9BD5 0%, #7DB8E8 100%);
+            
+            /* Background Colors */
+            --bg-cream: #FFF5E6;
+            --bg-light: #FFFBF0;
+            
+            /* Text Colors */
+            --text-dark: #2C3E50;
+            --text-gray: #7F8C8D;
+            
+            /* Shadow Effects */
             --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.1);
             --shadow-heavy: 0 10px 30px rgba(0, 0, 0, 0.15);
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.12);
+            
             --border-radius: 16px;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--bg-cream);
             min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             position: relative;
             overflow-x: hidden;
         }
@@ -39,7 +61,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="0.5" fill="white" opacity="0.1"/><circle cx="20" cy="20" r="0.3" fill="white" opacity="0.05"/><circle cx="80" cy="30" r="0.4" fill="white" opacity="0.08"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="0.5" fill="%23FF9800" opacity="0.03"/><circle cx="20" cy="20" r="0.3" fill="%23FF9800" opacity="0.02"/><circle cx="80" cy="30" r="0.4" fill="%23FFB347" opacity="0.025"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
             pointer-events: none;
             z-index: 1;
         }
@@ -143,8 +165,8 @@
         }
 
         .nav-tabs .nav-link:hover:not(.active) {
-            background: rgba(102, 126, 234, 0.1);
-            color: #667eea;
+            background: rgba(255, 152, 0, 0.1);
+            color: var(--primary-orange);
         }
 
         .form-floating {
@@ -163,8 +185,8 @@
         }
 
         .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.15);
+            border-color: var(--primary-orange);
+            box-shadow: 0 0 0 0.25rem rgba(255, 152, 0, 0.15);
             background: white;
             transform: translateY(-2px);
         }
@@ -255,7 +277,12 @@
         }
 
         .alert-danger {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            background: linear-gradient(135deg, #FF5252 0%, #FF8A80 100%);
+            color: white;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #4CAF50 0%, #81C784 100%);
             color: white;
         }
 
@@ -305,8 +332,8 @@
         .spinner {
             width: 40px;
             height: 40px;
-            border: 3px solid rgba(102, 126, 234, 0.3);
-            border-top: 3px solid #667eea;
+            border: 3px solid rgba(255, 152, 0, 0.3);
+            border-top: 3px solid var(--primary-orange);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -353,7 +380,7 @@
         /* Input Focus Effects */
         .form-control:focus+.form-label,
         .form-control:not(:placeholder-shown)+.form-label {
-            color: #667eea;
+            color: var(--primary-orange);
         }
 
         /* Responsive */
@@ -379,6 +406,6 @@
         }
 
         .form-control:focus~.input-icon {
-            color: #667eea;
+            color: var(--primary-orange);
         }
     </style>

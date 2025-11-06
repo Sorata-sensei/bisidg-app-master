@@ -1,13 +1,14 @@
 <!-- Desktop Sidebar -->
 <aside class="sidebar" id="sidebar">
     <div class="logo">
-        <h1>BISDIG</h1>
+        <h1>{{ session('user_prodi') }}</h1>
+        <h7>Bimbingan PA</h7>
     </div>
     <nav>
         <ul class="nav-menu">
             <li class="nav-item">
                 <a href="{{ route('dashboard.admin.index') }}"
-                    class="nav-link {{ request()->is('admin/dashboard') ? 'active' : '' }}">
+                    class="nav-link {{ request()->is('admin/personal') ? 'active' : '' }}">
                     <i class="fa-solid fa-chart-pie nav-icon"></i>
                     Dashboard
                 </a>
@@ -35,6 +36,14 @@
                     </a>
                 </li>
             @endif
+
+            <li class="nav-item">
+                <a href="{{ route('admin.dashboard') }}"
+                    class="nav-link {{ request()->is('admin/dashboard') ? 'active' : '' }}">
+                    <i class="fa-solid fa-house nav-icon"></i>
+                    SuperApps
+                </a>
+            </li>
         </ul>
     </nav>
 </aside>

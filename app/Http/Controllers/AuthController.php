@@ -14,13 +14,13 @@ class AuthController extends Controller
     public function index()
     {
         if (Auth::guard('student')->check()) {
-            return redirect()->route('student.personal.index');
+            return redirect()->route('student.dashboard');
         }
 
         if (Auth::check()) {
             $role = Auth::user()->role;
             if (in_array($role, ['admin', 'superadmin', 'masteradmin'])) {
-                return redirect()->route('dashboard.admin.index');
+                return redirect()->route('admin.dashboard');
             }
         }
 
@@ -39,7 +39,19 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->intended(route('dashboard.admin.index'));
+
+            $user = Auth::user();
+            
+            $request->session()->put([
+                'user_id'         => encrypt($user->id),
+                'user_name'       => $user->name ?? null,
+                'user_email'      => $user->email ?? null,
+                'user_role'       => $user->role ?? null,
+                'user_photo'      => $user->photo ?? '0',
+                'user_prodi'      => $user->program_studi ?? 'Bisnis Digital',
+            ]);
+
+            return redirect()->intended(route('admin.dashboard'));
         }
 
         return back()
@@ -66,9 +78,10 @@ class AuthController extends Controller
                 'path_pic'      => $student->foto ?? '0',
                 'student_nama'  => $student->nama_lengkap ?? null,
                 'nim'           => $student->nim ?? null,
+                'student_prodi' => $student->program_studi ?? null,
             ]);
 
-            return redirect()->intended(route('student.personal.index'));
+            return redirect()->intended(route('student.dashboard'));
         }
 
         return back()

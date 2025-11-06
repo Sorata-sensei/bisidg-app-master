@@ -6,10 +6,15 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\Student;
+use App\Models\CardCounseling;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
+    /**
+     * Dashboard lama (personal)
+     */
     public function index()
     {
        
@@ -18,6 +23,58 @@ class DashboardController extends Controller
             'menu'=>'Dashboard',
             'students' => Student::count(),
         ]);
+    }
+
+    /**
+     * Dashboard SuperApp
+     */
+    public function dashboard(Request $request)
+    {
+        $user = auth()->user();
+        
+        // Data untuk Chart: Mahasiswa per Angkatan
+        $studentsByBatch = Student::where('id_lecturer', $user->id)
+            ->select('angkatan', DB::raw('count(*) as total'))
+            ->groupBy('angkatan')
+            ->orderBy('angkatan', 'asc')
+            ->get();
+        
+        $batchLabels = $studentsByBatch->pluck('angkatan')->toArray();
+        $batchData = $studentsByBatch->pluck('total')->toArray();
+        
+        // Data untuk Chart: Mahasiswa per Prodi/Jurusan
+        $studentsByProdi = Student::where('id_lecturer', $user->id)
+            ->select('program_studi', DB::raw('count(*) as total'))
+            ->groupBy('program_studi')
+            ->orderBy('total', 'desc')
+            ->get();
+        
+        $prodiLabels = $studentsByProdi->pluck('program_studi')->toArray();
+        $prodiData = $studentsByProdi->pluck('total')->toArray();
+        
+        // Data untuk Chart: IPK Rata-rata per Angkatan
+        $ipkByBatch = Student::where('id_lecturer', $user->id)
+            ->whereNotNull('ipk')
+            ->select('angkatan', DB::raw('AVG(ipk) as avg_ipk'))
+            ->groupBy('angkatan')
+            ->orderBy('angkatan', 'asc')
+            ->get();
+        
+        $ipkLabels = $ipkByBatch->pluck('angkatan')->toArray();
+        $ipkData = $ipkByBatch->pluck('avg_ipk')->map(function($ipk) {
+            return round($ipk, 2);
+        })->toArray();
+        
+        return view('admin.dashboard.super-app-home', compact(
+            'user',
+            'batchLabels',
+            'batchData',
+            'studentsByProdi',
+            'prodiLabels',
+            'prodiData',
+            'ipkLabels',
+            'ipkData'
+        ));
     }
   
 }

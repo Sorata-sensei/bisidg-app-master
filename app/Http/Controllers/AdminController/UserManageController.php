@@ -55,8 +55,9 @@ class UserManageController extends Controller
     {
         $request->validate($this->rules());
 
-        $user = new User($request->only(['name', 'email', 'username', 'NIDNorNUPTK', 'role']));
+        $user = new User($request->only(['name', 'email', 'username', 'NIDNorNUPTK', 'role', 'program_studi']));
         $user->role = $request->role ?? 'admin';
+        $user->program_studi = $request->program_studi ?? 'Bisnis Digital';
         $user->password = bcrypt('USHBISDIG9599'); // password default hardcoded
 
         $user->photo = $this->handleUpload($request, 'photo', null, 'users/photo');
@@ -76,7 +77,12 @@ class UserManageController extends Controller
 
         $request->validate($this->rules($user->id));
 
-        $user->fill($request->only('name', 'email', 'username', 'NIDNorNUPTK', 'role'));
+        $user->fill($request->only('name', 'email', 'username', 'NIDNorNUPTK', 'role', 'program_studi'));
+
+        // Update password jika diisi
+        if ($request->filled('password')) {
+            $user->password = bcrypt($request->password);
+        }
 
         $user->photo = $this->handleUpload($request, 'photo', $user->photo, 'users/photo');
         $user->ttd   = $this->handleUpload($request, 'ttd', $user->ttd, 'users/ttd');
@@ -92,11 +98,14 @@ class UserManageController extends Controller
     private function rules($id = null): array
     {
         return [
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email,' . ($id ?? 'NULL') . ',id',
-            'username' => 'nullable|string|unique:users,username,' . ($id ?? 'NULL') . ',id',
-            'photo'    => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'ttd'      => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'name'          => 'required|string|max:255',
+            'email'         => 'required|email|unique:users,email,' . ($id ?? 'NULL') . ',id',
+            'username'      => 'nullable|string|unique:users,username,' . ($id ?? 'NULL') . ',id',
+            'program_studi' => 'required|string|max:50',
+            'role'          => 'required|string|in:admin,dosen,kaprodi',
+            'password'      => 'nullable|string|min:8',
+            'photo'         => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'ttd'           => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ];
     }
 

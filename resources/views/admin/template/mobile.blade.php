@@ -2,8 +2,15 @@
 <nav class="mobile-nav">
     <ul class="mobile-nav-list">
         <li class="mobile-nav-item">
-            <a href="{{ route('dashboard.admin.index') }}"
+            <a href="{{ route('admin.dashboard') }}"
                 class="mobile-nav-link {{ request()->is('admin/dashboard') ? 'active' : '' }}">
+                <i class="fa-solid fa-house mobile-nav-icon"></i>
+                <span>SuperApps</span>
+            </a>
+        </li>
+        <li class="mobile-nav-item">
+            <a href="{{ route('dashboard.admin.index') }}"
+                class="mobile-nav-link {{ request()->is('admin/personal') ? 'active' : '' }}">
                 <i class="fa-solid fa-chart-pie mobile-nav-icon"></i>
                 <span>Dashboard</span>
             </a>

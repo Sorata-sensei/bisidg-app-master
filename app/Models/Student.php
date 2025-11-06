@@ -81,6 +81,11 @@ class Student extends Authenticatable
         return $this->hasMany(CardCounseling::class, 'id_student', 'id');
     }
 
+    public function achievements()
+    {
+        return $this->hasMany(StudentAchievement::class, 'student_id', 'id');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Query Scopes

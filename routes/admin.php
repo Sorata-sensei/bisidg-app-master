@@ -42,9 +42,12 @@ Route::middleware(['auth', 'role:superadmin,masteradmin'])->group(function () {
 // Admin, Superadmin, Masteradmin
 Route::middleware(['auth', 'role:admin,superadmin,masteradmin'])->group(function () {
 
-    // Dashboard
+    // Dashboard SuperApp
+    Route::get('/admin/dashboard', [DashboardController::class, 'dashboard'])->name('admin.dashboard');
+
+    // Dashboard Personal (old)
     Route::controller(DashboardController::class)
-        ->prefix('admin/dashboard')
+        ->prefix('admin/personal')
         ->name('dashboard.admin.')
         ->group(function () {
             Route::get('/', 'index')->name('index');

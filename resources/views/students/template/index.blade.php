@@ -33,7 +33,7 @@
                     </a>
 
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ route('auth.logout') }}">Logout</a></li>
+                        <li><a class="dropdown-item" href="{{ route('student.dashboard') }}">SuperApps Dashboard</a></li>
                     </ul>
                 </div>
             </div>

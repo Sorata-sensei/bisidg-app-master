@@ -32,7 +32,6 @@
         .nav-icon {
             margin-right: 8px;
             width: 20px;
-            /* biar rata kiri */
             text-align: center;
             font-size: 16px;
         }
@@ -56,7 +55,6 @@
         .photo-wrapper {
 
             border-radius: 50%;
-            /* bulat sempurna */
             overflow: hidden;
             display: flex;
             align-items: center;
@@ -68,7 +66,6 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            /* isi penuh, crop otomatis */
         }
 
 
@@ -89,7 +86,6 @@
             min-height: 100vh;
         }
 
-        /* Desktop Sidebar */
         .sidebar {
             width: 280px;
             background: linear-gradient(145deg, #3338A0, #4a4fb8);
@@ -171,7 +167,6 @@
             font-size: 1.2rem;
         }
 
-        /* Main Content */
         .main-content {
             flex: 1;
             margin-left: 280px;
@@ -225,7 +220,6 @@
             font-size: 1.2rem;
         }
 
-        /* Dashboard Cards */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -283,7 +277,6 @@
             font-size: 0.9rem;
         }
 
-        /* Chart Container */
         .chart-container {
             background: white;
             padding: 2rem;
@@ -304,7 +297,6 @@
             font-weight: 600;
         }
 
-        /* Mobile Bottom Navigation */
         .mobile-nav {
             display: none;
             position: fixed;
@@ -346,7 +338,6 @@
             margin-bottom: 0.3rem;
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -419,7 +410,6 @@
             box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
         }
 
-        /* === Sticky Footer (Bagian yang Kita Perlukan) === */
         .sticky-footer {
             background-color: #2c3e50;
             color: #ecf0f1;
@@ -429,7 +419,6 @@
             border-top: 2px solid #34495e;
         }
 
-        /* === Kopiyright Text (Bersih & Modern) === */
         .copyright span {
             font-weight: 500;
             color: #000000;
