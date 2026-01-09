@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use App\Models\CardCounseling;
 use App\Models\Course;
+use Illuminate\Support\Facades\Hash;
 
 class StudentsAdminController extends Controller
 {
@@ -59,6 +60,176 @@ class StudentsAdminController extends Controller
             ->appends(['search' => $search]);
 
         return view('admin.management.students.index', compact('students', 'search'));
+    }
+
+    /**
+     * Download template CSV untuk import mahasiswa (Management Mahasiswa).
+     */
+    public function downloadImportTemplate()
+    {
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="template_import_mahasiswa.csv"',
+        ];
+
+        // Email tidak diperlukan di template (opsional di sistem).
+        $csv = implode(',', ['nama', 'nim', 'angkatan', 'program_studi', 'password']) . "\n";
+        // Kosongkan password untuk default = NIM (bcrypt)
+        $csv .= implode(',', ['Budi Santoso', '2201234567', '2022', 'Bisnis Digital', '']) . "\n";
+
+        // BOM untuk Excel
+        $csv = "\xEF\xBB\xBF" . $csv;
+
+        return response($csv, 200, $headers);
+    }
+
+    /**
+     * Import mahasiswa dari CSV (Management Mahasiswa).
+     * - Password default: nim (bcrypt), jika kolom password diisi maka gunakan itu.
+     * - Field wajib tabel yang tidak ada di template akan diisi default.
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'import_file' => 'required|file|mimes:csv,txt|max:5120',
+        ]);
+
+        $path = $request->file('import_file')->getRealPath();
+        if (!$path) {
+            return back()->with('error', 'File tidak valid.');
+        }
+
+        $handle = fopen($path, 'r');
+        if (!$handle) {
+            return back()->with('error', 'Gagal membaca file.');
+        }
+
+        $firstLine = fgets($handle);
+        if ($firstLine === false) {
+            fclose($handle);
+            return back()->with('error', 'File kosong.');
+        }
+        $delimiter = (substr_count($firstLine, ';') > substr_count($firstLine, ',')) ? ';' : ',';
+
+        // rewind & read header
+        rewind($handle);
+        $header = fgetcsv($handle, 0, $delimiter);
+        if (!$header) {
+            fclose($handle);
+            return back()->with('error', 'Header CSV tidak ditemukan.');
+        }
+
+        $header = array_map(fn ($h) => strtolower(trim((string) $h)), $header);
+        $idx = fn (array $keys) => collect($keys)->map(fn ($k) => array_search($k, $header, true))->first(fn ($v) => $v !== false);
+
+        $iNama = $idx(['nama', 'name', 'nama_lengkap']);
+        $iNim = $idx(['nim']);
+        $iAngkatan = $idx(['angkatan', 'batch']);
+        $iProdi = $idx(['program_studi', 'prodi', 'program studi']);
+        $iEmail = $idx(['email']);
+        $iPassword = $idx(['password']);
+
+        if ($iNama === null || $iNim === null || $iAngkatan === null || $iProdi === null) {
+            fclose($handle);
+            return back()->with('error', 'Kolom wajib tidak lengkap. Wajib: nama, nim, angkatan, program_studi.');
+        }
+
+        $created = 0;
+        $updated = 0;
+        $skipped = 0;
+        $errors = [];
+
+        DB::beginTransaction();
+        try {
+            $rowNo = 1; // header
+            while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
+                $rowNo++;
+                if (count(array_filter($row, fn ($v) => trim((string) $v) !== '')) === 0) {
+                    continue;
+                }
+
+                $nama = trim((string) ($row[$iNama] ?? ''));
+                $nim = trim((string) ($row[$iNim] ?? ''));
+                $angkatan = trim((string) ($row[$iAngkatan] ?? ''));
+                $prodi = trim((string) ($row[$iProdi] ?? ''));
+                $email = $iEmail !== null ? trim((string) ($row[$iEmail] ?? '')) : null;
+                $passwordPlain = $iPassword !== null ? trim((string) ($row[$iPassword] ?? '')) : '';
+
+                if ($nama === '' || $nim === '' || $angkatan === '' || $prodi === '') {
+                    $skipped++;
+                    $errors[] = "Baris {$rowNo}: data wajib kosong.";
+                    continue;
+                }
+
+                if (!preg_match('/^\d{4}$/', $angkatan)) {
+                    $skipped++;
+                    $errors[] = "Baris {$rowNo}: angkatan tidak valid ({$angkatan}).";
+                    continue;
+                }
+
+                $tanggalMasuk = "{$angkatan}-09-01";
+
+                // Cari dosen PA default untuk prodi ini (role admin), fallback ke dosen admin pertama, terakhir fallback ke user login.
+                $lecturerId = User::query()
+                    ->where('role', 'admin')
+                    ->where('program_studi', $prodi)
+                    ->value('id')
+                    ?? User::query()->where('role', 'admin')->value('id')
+                    ?? (int) auth()->id();
+
+                $student = Student::query()->where('nim', $nim)->first();
+
+                if ($student) {
+                    $updateData = [
+                        'nama_lengkap' => $nama,
+                        'angkatan' => (int) $angkatan,
+                        'program_studi' => $prodi,
+                        'email' => $email ?: $student->email,
+                        'id_lecturer' => $student->id_lecturer ?: $lecturerId,
+                    ];
+
+                    if ($passwordPlain !== '') {
+                        $updateData['password'] = Hash::make($passwordPlain);
+                    }
+
+                    $student->update($updateData);
+                    $updated++;
+                    continue;
+                }
+
+                $passwordToUse = $passwordPlain !== '' ? $passwordPlain : $nim;
+
+                Student::create([
+                    'id_lecturer' => $lecturerId,
+                    'nama_lengkap' => $nama,
+                    'nim' => $nim,
+                    'password' => Hash::make($passwordToUse),
+                    'angkatan' => (int) $angkatan,
+                    'program_studi' => $prodi,
+                    'email' => $email ?: null,
+                    'jenis_kelamin' => 'L',
+                    'status_mahasiswa' => 'Aktif',
+                    'tanggal_masuk' => $tanggalMasuk,
+                ]);
+                $created++;
+            }
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            fclose($handle);
+            \Log::error('Student import failed: ' . $e->getMessage());
+            return back()->with('error', 'Import gagal: ' . $e->getMessage());
+        }
+
+        fclose($handle);
+
+        $msg = "Import selesai. Created: {$created}, Updated: {$updated}, Skipped: {$skipped}.";
+        if (count($errors) > 0) {
+            $msg .= ' Contoh error: ' . implode(' | ', array_slice($errors, 0, 3));
+        }
+
+        return back()->with('success', $msg);
     }
 
     /**
@@ -348,10 +519,10 @@ class StudentsAdminController extends Controller
     public function resetpassword($id)
     {
         $student = Student::findOrFail($id);
-        $student->password = bcrypt('Bisdig2025');
+        $student->password = bcrypt('password');
         $student->save();
 
-        return redirect()->back()->with('success', "Password untuk {$student->nama_lengkap} telah direset ke 'Bsidig2025'.");
+        return redirect()->back()->with('success', "Password untuk {$student->nama_lengkap} telah direset ke 'password'.");
     }
     /**
      * Remove a student.

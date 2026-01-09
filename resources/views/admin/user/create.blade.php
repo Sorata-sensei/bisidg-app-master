@@ -140,7 +140,7 @@
                             {{-- Info password default saat create (optional notice) --}}
                             @unless ($isEdit)
                                 <div class="alert alert-info">
-                                    Password default akan diset ke <b>USHBISDIG9599</b>.
+                                    Password default akan diset ke <b>password</b>.
                                 </div>
                             @endunless
 

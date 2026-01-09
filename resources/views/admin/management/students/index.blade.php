@@ -15,6 +15,36 @@
             </div>
         @endif
 
+        @if(session('error'))
+            <div class="alert-danger">
+                <i class="bi bi-x-circle"></i> {{ session('error') }}
+            </div>
+        @endif
+
+        <!-- Import CSV -->
+        <div class="import-card">
+            <div class="import-left">
+                <div class="import-title">
+                    <i class="bi bi-upload"></i> Import Mahasiswa (CSV)
+                </div>
+                <div class="import-hint">
+                    <a href="{{ route('admin.management.students.template') }}" class="import-link">
+                        Download template
+                    </a>
+                    lalu upload CSV. Password default: <b>NIM</b> (bcrypt). Kolom password boleh dikosongkan.
+                </div>
+            </div>
+            <div class="import-right">
+                <form method="POST" action="{{ route('admin.management.students.import') }}" enctype="multipart/form-data" class="import-form">
+                    @csrf
+                    <input type="file" name="import_file" class="file-input" accept=".csv,text/csv" required>
+                    <button type="submit" class="btn-primary">
+                        <i class="bi bi-cloud-arrow-up"></i> Import
+                    </button>
+                </form>
+            </div>
+        </div>
+
         <!-- Search -->
         <div class="search-box">
             <form method="GET" action="{{ route('admin.management.students.index') }}">
@@ -154,6 +184,81 @@
         display: flex;
         align-items: center;
         gap: 10px;
+    }
+
+    .alert-danger {
+        background: #FFEBEE;
+        color: #C62828;
+        padding: 15px 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .import-card {
+        background: linear-gradient(135deg, rgba(255,152,0,0.08), rgba(255,251,240,1));
+        border: 1px solid rgba(255,152,0,0.18);
+        border-radius: 14px;
+        padding: 16px;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .import-title {
+        font-weight: 800;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .import-hint {
+        margin-top: 6px;
+        font-size: 12px;
+        color: #666;
+        font-weight: 500;
+    }
+
+    .import-link {
+        font-weight: 800;
+        color: var(--primary-orange);
+        text-decoration: none;
+        border-bottom: 1px dashed rgba(255,152,0,0.55);
+    }
+
+    .import-link:hover {
+        filter: brightness(0.95);
+    }
+
+    .import-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .import-form {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .file-input {
+        padding: 10px 12px;
+        border: 2px solid #E0E0E0;
+        border-radius: 10px;
+        background: white;
+        font-size: 13px;
+        max-width: 320px;
     }
 
     .search-box {

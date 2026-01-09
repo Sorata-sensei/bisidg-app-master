@@ -114,7 +114,7 @@ class StudentsController extends Controller
     public function editDataIndex(Request $request)
     {
         $student = Student::with(['dosenPA', 'achievements'])->findOrFail(decrypt(session('student_id')));
-        $isDefaultPassword = \Hash::check('Bisdig2025', $student->password);
+        $isDefaultPassword = \Hash::check('password', $student->password);
         return view('students.personal.edit', compact('student', 'isDefaultPassword'));
     }
 

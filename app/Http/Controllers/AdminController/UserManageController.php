@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Crypt;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 
 class UserManageController extends Controller
 {
@@ -49,6 +50,144 @@ class UserManageController extends Controller
             ->appends(['search' => $search]);
 
         return view('admin.management.lecturers.index', compact('lecturers', 'search'));
+    }
+
+    /**
+     * Download template CSV untuk import dosen (Management Dosen).
+     * Password default: "password" (bcrypt).
+     */
+    public function downloadImportTemplate()
+    {
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="template_import_dosen.csv"',
+        ];
+
+        $csv = implode(',', ['nama', 'email', 'program_studi']) . "\n";
+        $csv .= implode(',', ['Dosen Contoh', 'dosen@example.com', 'Bisnis Digital']) . "\n";
+
+        // BOM untuk Excel
+        $csv = "\xEF\xBB\xBF" . $csv;
+
+        return response($csv, 200, $headers);
+    }
+
+    /**
+     * Import dosen dari CSV (Management Dosen).
+     * - role selalu 'admin' (label: Dosen)
+     * - password default: "password"
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'import_file' => 'required|file|mimes:csv,txt|max:5120',
+        ]);
+
+        $path = $request->file('import_file')->getRealPath();
+        if (!$path) {
+            return back()->with('error', 'File tidak valid.');
+        }
+
+        $handle = fopen($path, 'r');
+        if (!$handle) {
+            return back()->with('error', 'Gagal membaca file.');
+        }
+
+        $firstLine = fgets($handle);
+        if ($firstLine === false) {
+            fclose($handle);
+            return back()->with('error', 'File kosong.');
+        }
+        $delimiter = (substr_count($firstLine, ';') > substr_count($firstLine, ',')) ? ';' : ',';
+
+        rewind($handle);
+        $header = fgetcsv($handle, 0, $delimiter);
+        if (!$header) {
+            fclose($handle);
+            return back()->with('error', 'Header CSV tidak ditemukan.');
+        }
+
+        $header = array_map(fn ($h) => strtolower(trim((string) $h)), $header);
+        $idx = fn (array $keys) => collect($keys)->map(fn ($k) => array_search($k, $header, true))->first(fn ($v) => $v !== false);
+
+        $iNama = $idx(['nama', 'name']);
+        $iEmail = $idx(['email']);
+        $iProdi = $idx(['program_studi', 'prodi', 'program studi']);
+
+        if ($iNama === null || $iEmail === null || $iProdi === null) {
+            fclose($handle);
+            return back()->with('error', 'Kolom wajib tidak lengkap. Wajib: nama, email, program_studi.');
+        }
+
+        $created = 0;
+        $updated = 0;
+        $skipped = 0;
+        $errors = [];
+
+        DB::beginTransaction();
+        try {
+            $rowNo = 1;
+            while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
+                $rowNo++;
+                if (count(array_filter($row, fn ($v) => trim((string) $v) !== '')) === 0) {
+                    continue;
+                }
+
+                $nama = trim((string) ($row[$iNama] ?? ''));
+                $email = trim((string) ($row[$iEmail] ?? ''));
+                $prodi = trim((string) ($row[$iProdi] ?? ''));
+
+                if ($nama === '' || $email === '' || $prodi === '') {
+                    $skipped++;
+                    $errors[] = "Baris {$rowNo}: data wajib kosong.";
+                    continue;
+                }
+
+                $existing = User::query()->where('email', $email)->first();
+                if ($existing) {
+                    // Jangan override akun non-admin
+                    if ($existing->role !== 'admin') {
+                        $skipped++;
+                        $errors[] = "Baris {$rowNo}: email {$email} sudah dipakai role {$existing->role}.";
+                        continue;
+                    }
+
+                    $existing->update([
+                        'name' => $nama,
+                        'program_studi' => $prodi,
+                        'role' => 'admin',
+                    ]);
+                    $updated++;
+                    continue;
+                }
+
+                $u = new User([
+                    'name' => $nama,
+                    'email' => $email,
+                    'program_studi' => $prodi,
+                    'role' => 'admin',
+                ]);
+                $u->password = bcrypt('password');
+                $u->save();
+                $created++;
+            }
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            fclose($handle);
+            \Log::error('Lecturer import failed: ' . $e->getMessage());
+            return back()->with('error', 'Import gagal: ' . $e->getMessage());
+        }
+
+        fclose($handle);
+
+        $msg = "Import selesai. Created: {$created}, Updated: {$updated}, Skipped: {$skipped}.";
+        if (count($errors) > 0) {
+            $msg .= ' Contoh error: ' . implode(' | ', array_slice($errors, 0, 3));
+        }
+
+        return back()->with('success', $msg);
     }
 
     /**
@@ -117,7 +256,7 @@ class UserManageController extends Controller
         $user = new User($request->only(['name', 'email', 'username', 'NIDNorNUPTK', 'role', 'program_studi']));
         $user->role = $request->role ?? 'admin';
         $user->program_studi = $request->program_studi ?? 'Bisnis Digital';
-        $user->password = bcrypt('USHBISDIG9599'); // password default hardcoded
+        $user->password = bcrypt('password'); // password default
 
         $user->photo = $this->handleUpload($request, 'photo', null, 'users/photo');
         $user->ttd   = $this->handleUpload($request, 'ttd', null, 'users/ttd');

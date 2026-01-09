@@ -22,6 +22,8 @@ Route::middleware(['auth', 'role:superadmin,masteradmin'])->group(function () {
         Route::get('/', 'managementIndex')->name('index');
         Route::get('/create', 'create')->name('create');
         Route::post('/', 'store')->name('store');
+        Route::get('/template', 'downloadImportTemplate')->name('template');
+        Route::post('/import', 'import')->name('import');
         Route::get('/{id}/edit', 'edit')->name('edit');
         Route::put('/{id}', 'update')->name('update');
         Route::delete('/{id}', 'destroy')->name('destroy');
@@ -32,6 +34,8 @@ Route::middleware(['auth', 'role:superadmin,masteradmin'])->group(function () {
         Route::get('/', 'managementIndex')->name('index');
         Route::get('/create', 'create')->name('create');
         Route::post('/', 'store')->name('store');
+        Route::get('/template', 'downloadImportTemplate')->name('template');
+        Route::post('/import', 'import')->name('import');
         Route::get('/{id}', 'show')->name('show');
         Route::get('/{id}/edit', 'edit')->name('edit');
         Route::put('/{id}', 'update')->name('update');

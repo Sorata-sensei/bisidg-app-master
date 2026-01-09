@@ -145,26 +145,6 @@
                 <p>Kelola menu dinamis untuk semua role</p>
                 <span class="status-badge active">Aktif</span>
             </a>
-
-            <!-- Management Dosen -->
-            <a href="{{ route('admin.management.lecturers.index') }}" class="menu-card">
-                <div class="menu-icon" style="background: linear-gradient(135deg, #5B9BD5, #7DB8E8);">
-                    <i class="bi bi-person-badge-fill"></i>
-                </div>
-                <h5>Management Dosen</h5>
-                <p>Kelola data dosen, tambah, edit, dan hapus</p>
-                <span class="status-badge active">Aktif</span>
-            </a>
-
-            <!-- Management Mahasiswa -->
-            <a href="{{ route('admin.management.students.index') }}" class="menu-card">
-                <div class="menu-icon" style="background: linear-gradient(135deg, #9C27B0, #BA68C8);">
-                    <i class="bi bi-people-fill"></i>
-                </div>
-                <h5>Management Mahasiswa</h5>
-                <p>Kelola data mahasiswa, tambah, edit, dan hapus</p>
-                <span class="status-badge active">Aktif</span>
-            </a>
             @endif
         </div>
     </div>
