@@ -26,12 +26,15 @@ class Student extends Authenticatable
         'id_lecturer',
         'nama_lengkap',
         'nim',
+        'nik',
+        'nisn',
         'password',
         'email',
         'angkatan',
         'program_studi',
         'fakultas',
         'jenis_kelamin',
+        'tempat_lahir',
         'tanggal_lahir',
         'alamat',
         'alamat_lat',
@@ -46,6 +49,7 @@ class Student extends Authenticatable
         'foto',
         'ttd',
         'nama_orangtua',
+        'nama_ibu_kandung',
         'is_edited',
     ];
 
@@ -61,6 +65,7 @@ class Student extends Authenticatable
     protected $casts = [
         'is_edited' => 'boolean',
         'is_counseling' => 'boolean',
+        'tanggal_lahir' => 'date',
         'tanggal_masuk' => 'datetime',
         'tanggal_lulus' => 'datetime',
         'tanggal_counseling' => 'datetime',
@@ -84,6 +89,11 @@ class Student extends Authenticatable
     public function achievements()
     {
         return $this->hasMany(StudentAchievement::class, 'student_id', 'id');
+    }
+
+    public function finalProject()
+    {
+        return $this->hasOne(\App\Models\FinalProject::class, 'student_id', 'id');
     }
 
     /*

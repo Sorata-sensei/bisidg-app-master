@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Student;
 use App\Models\StudentAchievement;
 use App\Models\CardCounseling;
+use App\Models\Announcement;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -31,7 +32,83 @@ class StudentsController extends Controller
             ->findOrFail(decrypt(session('student_id')));
         $counseling = CardCounseling::where('id_student', decrypt(session('student_id')))->count();
         
-        return view('students.dashboard.super-app-home', compact('student', 'counseling'));
+        // Load menu dinamis untuk role student
+        $menus = \App\Models\MenuItem::active()
+            ->forRole('student')
+            ->ordered()
+            ->get()
+            ->map(function($menu) {
+                $menu->menu_url = $menu->full_url;
+                return $menu;
+            });
+        
+        // Hindari menu yang mengarah ke area admin saat login sebagai mahasiswa.
+        // Kalau ada menu "Bimbingan PA" / "Tugas Akhir" versi admin, kita map ke route student yang benar.
+        $menus = $menus
+            ->map(function ($menu) {
+                $routeName = $menu->route_name ?? '';
+                $name = strtolower(trim((string) $menu->name));
+                $url = (string) ($menu->menu_url ?? '');
+
+                if ($name === 'bimbingan pa' || $routeName === 'admin.counseling.index' || str_starts_with($url, '/admin/counseling')) {
+                    $menu->menu_url = route('student.counseling.show');
+                    $menu->target = '_self';
+                    return $menu;
+                }
+
+                if ($name === 'tugas akhir' || $routeName === 'admin.final-project.index' || str_starts_with($url, '/admin/final-project')) {
+                    $menu->menu_url = route('student.final-project.index');
+                    $menu->target = '_self';
+                    return $menu;
+                }
+
+                return $menu;
+            })
+            ->filter(function ($menu) {
+                $routeName = $menu->route_name ?? '';
+                $url = (string) ($menu->menu_url ?? $menu->url ?? '');
+
+                if (str_starts_with($routeName, 'admin.') || str_starts_with($url, '/admin/')) {
+                    return false;
+                }
+                return true;
+            })
+            ->values();
+
+        // Fallback: pastikan 2 menu utama mahasiswa selalu ada
+        if (!$menus->contains(fn ($m) => ($m->route_name ?? '') === 'student.counseling.show' || ($m->menu_url ?? '') === route('student.counseling.show'))) {
+            $fallback = new \App\Models\MenuItem([
+                'name' => 'Bimbingan PA',
+                'icon' => 'bi bi-person-video3',
+                'description' => 'Konsultasi dengan dosen pembimbing akademik',
+                'badge_text' => 'Aktif',
+                'badge_color' => 'active',
+                'target' => '_self',
+            ]);
+            $fallback->menu_url = route('student.counseling.show');
+            $menus->push($fallback);
+        }
+
+        if (!$menus->contains(fn ($m) => ($m->route_name ?? '') === 'student.final-project.index' || ($m->menu_url ?? '') === route('student.final-project.index'))) {
+            $fallback = new \App\Models\MenuItem([
+                'name' => 'Tugas Akhir',
+                'icon' => 'bi bi-mortarboard',
+                'description' => 'Pengajuan judul, proposal, hingga sidang skripsi',
+                'badge_text' => 'Aktif',
+                'badge_color' => 'active',
+                'target' => '_self',
+            ]);
+            $fallback->menu_url = route('student.final-project.index');
+            $menus->push($fallback);
+        }
+
+        $announcements = Announcement::query()
+            ->published()
+            ->orderByDesc('published_at')
+            ->limit(3)
+            ->get();
+        
+        return view('students.dashboard.super-app-home', compact('student', 'counseling', 'menus', 'announcements'));
     }
 
     public function editDataIndex(Request $request)

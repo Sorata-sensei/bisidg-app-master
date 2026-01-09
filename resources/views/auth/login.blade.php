@@ -1,7 +1,7 @@
 @extends('auth.template.index')
 
 @section('content')
-    <div class="login-container">
+    <div class="login-container" style="scale: 0.8;">
         <div class="login-card">
             <!-- Loading Overlay -->
             <div class="form-overlay" id="loadingOverlay">
@@ -19,7 +19,7 @@
                     <button class="nav-link active w-100" id="dosen-tab" data-bs-toggle="tab" data-bs-target="#dosen"
                         type="button" role="tab" aria-controls="dosen" aria-selected="true">
                         <i class="fas fa-chalkboard-teacher me-2"></i>
-                        Dosen
+                        Dosen/Staff
                     </button>
                 </li>
                 <li class="nav-item flex-fill" role="presentation">
@@ -57,7 +57,7 @@
                             <button type="submit" class="btn btn-primary btn-lg">
                                 <span>
                                     <i class="fas fa-sign-in-alt me-2"></i>
-                                    Sign In as Dosen
+                                    Masuk sebagai Dosen/Staff
                                 </span>
                             </button>
                         </div>

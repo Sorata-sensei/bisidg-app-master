@@ -86,15 +86,9 @@
                                 <label for="role" class="form-label">Role</label>
                                 <select name="role" id="role" class="form-control form-control-lg">
                                     @php $roleNow = old('role', $user->role ?? 'admin'); @endphp
-                                    <option value="admin" {{ $roleNow == 'admin' ? 'selected' : '' }}>Admin</option>
-                                    <option value="dosen" {{ $roleNow == 'dosen' ? 'selected' : '' }}>Dosen</option>
-                                    <option value="mahasiswa" {{ $roleNow == 'mahasiswa' ? 'selected' : '' }}>Mahasiswa
-                                    </option>
-                                    <option value="superadmin" {{ $roleNow == 'superadmin' ? 'selected' : '' }}>Superadmin
-                                    </option>
-                                    <option value="masteradmin" {{ $roleNow == 'masteradmin' ? 'selected' : '' }}>
-                                        Masteradmin
-                                    </option>
+                                    <option value="admin" {{ $roleNow == 'admin' ? 'selected' : '' }}>Dosen</option>
+                                    <option value="superadmin" {{ $roleNow == 'superadmin' ? 'selected' : '' }}>Kaprodi</option>
+                                    <option value="masteradmin" {{ $roleNow == 'masteradmin' ? 'selected' : '' }}>Superuser</option>
                                 </select>
                                 @error('role')
                                     <div class="text-danger small mt-1">{{ $message }}</div>

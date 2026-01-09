@@ -414,8 +414,19 @@
         .container {
             padding: 20px 15px;
             margin-top: 80px;
-            z-index: 1;
             position: relative;
+        }
+
+        /* Bootstrap modal layering fix:
+           - our layout uses high z-index for header/dropdown
+           - ensure modals/backdrops are always above them
+           - avoid stacking-context issues by not forcing container z-index
+        */
+        .modal-backdrop {
+            z-index: 10040 !important;
+        }
+        .modal {
+            z-index: 10050 !important;
         }
 
         /* Responsive */
@@ -573,13 +584,13 @@
                 </div>
                 <span>Home</span>
             </a>
-            <div class="nav-item">
+            <a href="{{ route('calendar.index') }}" class="nav-item {{ request()->routeIs('calendar.index') ? 'active' : '' }}">
                 <div class="nav-icon">
                     <i class="bi bi-calendar-check"></i>
                 </div>
                 <span>Calendar</span>
-            </div>
-            <a href="#" class="nav-item">
+            </a>
+            <a href="{{ route('notifications.index') }}" class="nav-item {{ request()->routeIs('notifications.*') ? 'active' : '' }}">
                 <div class="nav-icon">
                     <i class="bi bi-bell-fill"></i>
                 </div>
@@ -602,13 +613,13 @@
             </div>
             <span>Home</span>
         </a>
-        <div class="nav-item">
+        <a href="{{ route('calendar.index') }}" class="nav-item {{ request()->routeIs('calendar.index') ? 'active' : '' }}">
             <div class="nav-icon">
                 <i class="bi bi-calendar-check"></i>
             </div>
             <span>Calendar</span>
-        </div>
-        <a href="#" class="nav-item">
+        </a>
+        <a href="{{ route('notifications.index') }}" class="nav-item {{ request()->routeIs('notifications.*') ? 'active' : '' }}">
             <div class="nav-icon">
                 <i class="bi bi-bell-fill"></i>
             </div>

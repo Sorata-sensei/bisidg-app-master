@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use App\Models\User;
 use Auth;
 
 class IsSuperAdmin
@@ -16,7 +17,7 @@ class IsSuperAdmin
      */
     public function handle($request, Closure $next)
     {
-        if (Auth::user() &&  Auth::user()->role == 'superadmin') {
+        if (Auth::user() && User::normalizeRole(Auth::user()->role) === 'superadmin') {
              return $next($request);
         }
 

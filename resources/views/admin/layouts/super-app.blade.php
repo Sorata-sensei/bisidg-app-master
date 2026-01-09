@@ -518,11 +518,11 @@
                 <i class="bi bi-list"></i>
             </button>
 
-            <!-- Logo Section (Desktop Only) -->
-            <div class="logo-section desktop-only">
+            <!-- Logo Section (Desktop Only) link to dashboard -->
+            <a href="{{ route('admin.dashboard') }}" class="logo-section desktop-only" style="transform: translateX(50px);text-decoration: none;">
                 <img src="{{ asset('ush.png') }}" alt="USH Logo" class="header-logo">
                 <h4 class="app-title">Universitas Sugeng Hartono</h4>
-            </div>
+            </a>
             
             <!-- User Info -->
             <div class="user-info">
@@ -573,26 +573,24 @@
                 </div>
                 <span>Home</span>
             </a>
-            <div class="nav-item">
+            <a href="{{ route('calendar.index') }}" class="nav-item {{ request()->routeIs('calendar.index') ? 'active' : '' }}">
                 <div class="nav-icon">
                     <i class="bi bi-calendar-check"></i>
                 </div>
                 <span>Calendar</span>
-            </div>
-            <a href="#" class="nav-item">
+            </a>
+            <a href="{{ route('notifications.index') }}" class="nav-item {{ request()->routeIs('notifications.*') ? 'active' : '' }}">
                 <div class="nav-icon">
                     <i class="bi bi-bell-fill"></i>
                 </div>
                 <span>Notification</span>
             </a>
-            @if(auth()->user()->role === 'superadmin' || auth()->user()->role === 'masteradmin')
-            <a href="{{ route('user.admin.main') }}" class="nav-item {{ request()->routeIs('user.admin.main') ? 'active' : '' }}">
+            <a href="{{ route('admin.announcements.index') }}" class="nav-item {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">
                 <div class="nav-icon">
-                    <i class="bi bi-person-badge-fill"></i>
+                    <i class="bi bi-bell-fill"></i>
                 </div>
-                <span>Dosen</span>
+                <span>Pengumuman</span>
             </a>
-            @endif
             <a href="{{ route('user.admin.index') }}" class="nav-item {{ request()->routeIs('user.admin.index') ? 'active' : '' }}">
                 <div class="nav-icon">
                     <i class="bi bi-person-circle"></i>
@@ -610,23 +608,35 @@
             </div>
             <span>Home</span>
         </a>
-        <div class="nav-item">
+        <a href="{{ route('calendar.index') }}" class="nav-item {{ request()->routeIs('calendar.index') ? 'active' : '' }}">
             <div class="nav-icon">
                 <i class="bi bi-calendar-check"></i>
             </div>
             <span>Calendar</span>
-        </div>
-        <a href="#" class="nav-item">
+        </a>
+        <a href="{{ route('notifications.index') }}" class="nav-item {{ request()->routeIs('notifications.*') ? 'active' : '' }}">
             <div class="nav-icon">
                 <i class="bi bi-bell-fill"></i>
             </div>
-            <span>Notification</span>
+            <span>Notif</span>
+        </a>
+        <a href="{{ route('admin.announcements.index') }}" class="nav-item {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">
+            <div class="nav-icon">
+                <i class="bi bi-bell-fill"></i>
+            </div>
+            <span>Pengumuman</span>
         </a>
         <a href="{{ route('admin.counseling.index') }}" class="nav-item {{ request()->routeIs('admin.counseling.*') ? 'active' : '' }}">
             <div class="nav-icon">
                 <i class="bi bi-people-fill"></i>
             </div>
             <span>Bimbingan</span>
+        </a>
+        <a href="{{ route('admin.final-project.index') }}" class="nav-item {{ request()->routeIs('admin.final-project.*') ? 'active' : '' }}">
+            <div class="nav-icon">
+                <i class="bi bi-mortarboard"></i>
+            </div>
+            <span>Tugas Akhir</span>
         </a>
         @if(auth()->user()->role === 'superadmin' || auth()->user()->role === 'masteradmin')
         <a href="{{ route('user.admin.main') }}" class="nav-item {{ request()->routeIs('user.admin.main') ? 'active' : '' }}">

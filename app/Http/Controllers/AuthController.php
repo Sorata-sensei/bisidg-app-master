@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Student;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
@@ -18,8 +19,8 @@ class AuthController extends Controller
         }
 
         if (Auth::check()) {
-            $role = Auth::user()->role;
-            if (in_array($role, ['admin', 'superadmin', 'masteradmin'])) {
+            $role = User::normalizeRole(Auth::user()->role);
+            if (in_array($role, ['admin', 'superadmin', 'masteradmin'], true)) {
                 return redirect()->route('admin.dashboard');
             }
         }

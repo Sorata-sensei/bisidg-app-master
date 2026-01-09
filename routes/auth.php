@@ -8,7 +8,7 @@ Route::controller(AuthController::class)
     ->name('auth.')
     ->group(function () {
         // Login utama
-        Route::get('/', 'index')->name('login');  
+        Route::get('/login', 'index')->name('login');
         Route::post('/login', 'login')->name('login.post');  
 
         // Login khusus

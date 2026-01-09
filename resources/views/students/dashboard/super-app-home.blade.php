@@ -46,65 +46,58 @@
         </div>
         
         <div class="menu-grid">
-            <!-- Bimbingan PA -->
-            <a href="{{ route('student.counseling.show') }}" class="menu-card">
-                <div class="menu-icon" style="background: linear-gradient(135deg, #FF9800, #FFB347);">
-                    <i class="bi bi-person-video3"></i>
-                </div>
-                <h5>Bimbingan PA</h5>
-                <p>Konsultasi dengan dosen pembimbing akademik</p>
-                <span class="status-badge active">Aktif</span>
-            </a>
-            
-            <!-- Magang -->
-            <div class="menu-card">
-                <div class="menu-icon" style="background: linear-gradient(135deg, #FFC107, #FFD54F);">
-                    <i class="bi bi-building"></i>
-                </div>
-                <h5>Magang</h5>
-                <p>Program magang dan praktik kerja</p>
-                <span class="status-badge active">Aktif</span>
-            </div>
-            
-            <!-- TA -->
-            <div class="menu-card">
-                <div class="menu-icon" style="background: linear-gradient(135deg, #FF5252, #FF8A80);">
-                    <i class="bi bi-mortarboard"></i>
-                </div>
-                <h5>Tugas Akhir</h5>
-                <p>Platform Tugas Akhir</p>
-                <span class="status-badge active">Aktif</span>
-            </div>
-
-            <!-- Siakad Online -->
-            <a target="_blank" href="https://siakad.sugenghartono.ac.id/" class="menu-card">
-                <div class="menu-icon" style="background: linear-gradient(135deg, #5B9BD5, #7DB8E8);">
-                    <i class="bi bi-person-badge"></i>
-                </div>
-                <h5>Siakad Online</h5>
-                <p>Kelola informasi Nilai Anda</p>
-                <span class="status-badge active">Aktif</span>
-            </a>
-            
-            <!-- Perpustakaan -->
-            <a target="_blank" href="https://library.sugenghartono.ac.id/" class="menu-card">
-                <div class="menu-icon" style="background: linear-gradient(135deg, #4CAF50, #81C784);">
-                    <i class="bi bi-book-half"></i>
-                </div>
-                <h5>Perpustakaan</h5>
-                <p>Akses katalog dan peminjaman buku</p>
-                <span class="status-badge active">Aktif</span>
-            </a>
-            
-            <!-- Future Features -->
-            <div class="menu-card">
-                <div class="menu-icon" style="background: linear-gradient(135deg, #9C27B0, #BA68C8);">
-                    <i class="bi bi-stars"></i>
-                </div>
-                <h5>Future Features</h5>
-                <p>Fitur baru yang akan datang</p>
-                <span class="status-badge info">Coming Soon</span>
-            </div>
+            @forelse($menus ?? [] as $menu)
+                @php
+                    $iconColors = [
+                        'bi-person-video3' => 'linear-gradient(135deg, #FF9800, #FFB347)',
+                        'bi-mortarboard' => 'linear-gradient(135deg, #FF5252, #FF8A80)',
+                        'bi-building' => 'linear-gradient(135deg, #FFC107, #FFD54F)',
+                        'bi-person-badge' => 'linear-gradient(135deg, #5B9BD5, #7DB8E8)',
+                        'bi-book-half' => 'linear-gradient(135deg, #4CAF50, #81C784)',
+                        'bi-stars' => 'linear-gradient(135deg, #9C27B0, #BA68C8)',
+                    ];
+                    $defaultColor = 'linear-gradient(135deg, #2196F3, #64B5F6)';
+                    $iconColor = $iconColors[$menu->icon] ?? $defaultColor;
+                    
+                    $badgeClass = match($menu->badge_color) {
+                        'active' => 'active',
+                        'warning' => 'warning',
+                        'info' => 'info',
+                        'pending' => 'pending',
+                        default => 'active'
+                    };
+                @endphp
+                <a href="{{ $menu->menu_url }}" 
+                   target="{{ $menu->target ?? '_self' }}"
+                   class="menu-card">
+                    <div class="menu-icon" style="background: {{ $iconColor }};">
+                        @if($menu->icon)
+                            <i class="{{ $menu->icon }}"></i>
+                        @else
+                            <i class="bi bi-circle"></i>
+                        @endif
+                    </div>
+                    <h5>{{ $menu->name }}</h5>
+                    @if($menu->description)
+                        <p>{{ $menu->description }}</p>
+                    @endif
+                    @if($menu->badge_text)
+                        <span class="status-badge {{ $badgeClass }}">{{ $menu->badge_text }}</span>
+                    @else
+                        <span class="status-badge active">Aktif</span>
+                    @endif
+                </a>
+            @empty
+                <!-- Fallback menu jika belum ada menu di database -->
+                <a href="{{ route('student.counseling.show') }}" class="menu-card">
+                    <div class="menu-icon" style="background: linear-gradient(135deg, #FF9800, #FFB347);">
+                        <i class="bi bi-person-video3"></i>
+                    </div>
+                    <h5>Bimbingan PA</h5>
+                    <p>Konsultasi dengan dosen pembimbing akademik</p>
+                    <span class="status-badge active">Aktif</span>
+                </a>
+            @endforelse
         </div>
     </div>
 
@@ -112,42 +105,35 @@
     <div class="announcement-section">
         <div class="section-header">
             <h3>Pengumuman Terbaru</h3>
-            <a href="#" class="view-all">Lihat Semua</a>
+            <a href="{{ route('announcements.index') }}" class="view-all">Lihat Semua</a>
         </div>
         
         <div class="announcement-list">
-            <div class="announcement-item">
-                <div class="announcement-icon">
-                    <i class="bi bi-megaphone-fill"></i>
+            @forelse(($announcements ?? collect()) as $a)
+                <a class="announcement-item" href="{{ route('announcements.show', $a->id) }}" style="text-decoration: none;">
+                    <div class="announcement-icon">
+                        <i class="bi bi-megaphone-fill"></i>
+                    </div>
+                    <div class="announcement-content">
+                        <h5>{{ $a->title }}</h5>
+                        <p>{{ \Illuminate\Support\Str::limit(strip_tags($a->content ?? ''), 90) }}</p>
+                        <span class="time">
+                            <i class="bi bi-clock"></i>
+                            {{ ($a->published_at ?? $a->updated_at ?? $a->created_at)?->diffForHumans() ?? '' }}
+                        </span>
+                    </div>
+                </a>
+            @empty
+                <div class="announcement-item" style="cursor: default;">
+                    <div class="announcement-icon">
+                        <i class="bi bi-info-circle-fill"></i>
+                    </div>
+                    <div class="announcement-content">
+                        <h5>Belum ada pengumuman</h5>
+                        <p>Pengumuman terbaru akan tampil di sini setelah dipublish.</p>
+                    </div>
                 </div>
-                <div class="announcement-content">
-                    <h5>Pendaftaran Wisuda Periode 2025</h5>
-                    <p>Pendaftaran wisuda dibuka hingga 15 Oktober 2025</p>
-                    <span class="time"><i class="bi bi-clock"></i> 2 jam yang lalu</span>
-                </div>
-            </div>
-            
-            <div class="announcement-item">
-                <div class="announcement-icon">
-                    <i class="bi bi-calendar-event"></i>
-                </div>
-                <div class="announcement-content">
-                    <h5>Jadwal UTS Semester Genap</h5>
-                    <p>Ujian tengah semester dimulai 20 Oktober 2025</p>
-                    <span class="time"><i class="bi bi-clock"></i> 5 jam yang lalu</span>
-                </div>
-            </div>
-            
-            <div class="announcement-item">
-                <div class="announcement-icon">
-                    <i class="bi bi-trophy-fill"></i>
-                </div>
-                <div class="announcement-content">
-                    <h5>Kompetisi Inovasi Mahasiswa</h5>
-                    <p>Daftarkan tim Anda untuk kompetisi tahunan</p>
-                    <span class="time"><i class="bi bi-clock"></i> 1 hari yang lalu</span>
-                </div>
-            </div>
+            @endforelse
         </div>
     </div>
 @endsection

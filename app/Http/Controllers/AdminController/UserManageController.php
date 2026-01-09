@@ -30,13 +30,66 @@ class UserManageController extends Controller
     }
 
     /**
+     * Management Index - List semua dosen untuk superadmin/masteradmin
+     */
+    public function managementIndex(Request $request)
+    {
+        $search = $request->input('search');
+        
+        $lecturers = User::whereIn('role', ['admin', 'superadmin', 'masteradmin'])
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%")
+                      ->orWhere('program_studi', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('name', 'asc')
+            ->paginate(15)
+            ->appends(['search' => $search]);
+
+        return view('admin.management.lecturers.index', compact('lecturers', 'search'));
+    }
+
+    /**
+     * Destroy user
+     */
+    public function destroy($id)
+    {
+        $user = User::findOrFail($id);
+        
+        // Jangan hapus user yang sedang login
+        if ($user->id === Auth::id()) {
+            return redirect()->back()->with('error', 'Tidak dapat menghapus akun yang sedang digunakan.');
+        }
+
+        // Hapus foto dan ttd jika ada
+        if ($user->photo) {
+            Storage::disk('public')->delete($user->photo);
+        }
+        if ($user->ttd) {
+            Storage::disk('public')->delete($user->ttd);
+        }
+
+        $user->delete();
+
+        return redirect()->route('admin.management.lecturers.index')
+            ->with('success', 'Dosen berhasil dihapus.');
+    }
+
+    /**
      * Form tambah user
      */
     public function create()
     {
-        return view('admin.user.create', [
-            'user' => new User(), // instance kosong supaya Blade tidak error
-        ]);
+        $user = new User();
+        
+        // Tentukan view berdasarkan route
+        if (request()->routeIs('admin.management.lecturers.*')) {
+            return view('admin.management.lecturers.create', compact('user'));
+        }
+        
+        return view('admin.user.create', compact('user'));
     }
 
     /**
@@ -45,6 +98,12 @@ class UserManageController extends Controller
     public function edit($id)
     {
         $user = User::findOrFail($id);
+        
+        // Tentukan view berdasarkan route
+        if (request()->routeIs('admin.management.lecturers.*')) {
+            return view('admin.management.lecturers.edit', compact('user'));
+        }
+        
         return view('admin.user.edit', compact('user'));
     }
 
@@ -65,6 +124,11 @@ class UserManageController extends Controller
 
         $user->save();
 
+        // Redirect berdasarkan route yang dipanggil
+        if (request()->routeIs('admin.management.lecturers.*')) {
+            return redirect()->route('admin.management.lecturers.index')->with('success', 'Dosen berhasil ditambahkan');
+        }
+        
         return redirect()->route('user.admin.main')->with('success', 'User berhasil ditambahkan');
     }
 
@@ -89,6 +153,11 @@ class UserManageController extends Controller
 
         $user->save();
 
+        // Redirect berdasarkan route yang dipanggil
+        if (request()->routeIs('admin.management.lecturers.*')) {
+            return redirect()->route('admin.management.lecturers.index')->with('success', 'Dosen berhasil diperbarui');
+        }
+        
         return redirect()->route('user.admin.index')->with('success', 'User berhasil diperbarui');
     }
 
@@ -102,7 +171,7 @@ class UserManageController extends Controller
             'email'         => 'required|email|unique:users,email,' . ($id ?? 'NULL') . ',id',
             'username'      => 'nullable|string|unique:users,username,' . ($id ?? 'NULL') . ',id',
             'program_studi' => 'required|string|max:50',
-            'role'          => 'required|string|in:admin,dosen,kaprodi',
+            'role'          => 'required|string|in:admin,superadmin,masteradmin',
             'password'      => 'nullable|string|min:8',
             'photo'         => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'ttd'           => 'nullable|image|mimes:jpeg,png,jpg|max:2048',

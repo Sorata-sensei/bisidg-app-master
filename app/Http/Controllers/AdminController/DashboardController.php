@@ -9,6 +9,8 @@ use App\Models\Student;
 use App\Models\CardCounseling;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use App\Models\Announcement;
 
 class DashboardController extends Controller
 {
@@ -65,6 +67,26 @@ class DashboardController extends Controller
             return round($ipk, 2);
         })->toArray();
         
+        // Load menu dinamis dari database
+        $userRole = $user->role;
+        $menus = \App\Models\MenuItem::active()
+            ->forRole($userRole)
+            ->ordered()
+            ->get()
+            ->map(function($menu) {
+                $menu->menu_url = $menu->full_url;
+                return $menu;
+            });
+
+        $announcements = collect();
+        if (Schema::hasTable('announcements')) {
+            $announcements = Announcement::query()
+                ->published()
+                ->orderByDesc('published_at')
+                ->limit(3)
+                ->get();
+        }
+
         return view('admin.dashboard.super-app-home', compact(
             'user',
             'batchLabels',
@@ -73,7 +95,9 @@ class DashboardController extends Controller
             'prodiLabels',
             'prodiData',
             'ipkLabels',
-            'ipkData'
+            'ipkData',
+            'menus',
+            'announcements'
         ));
     }
   

@@ -44,7 +44,7 @@
                     </div>
                 </div>
                 <h4 class="profile-name">{{ $user->name }}</h4>
-                <p class="profile-role">{{ ucfirst($user->role) }} • {{ $user->program_studi }}</p>
+                <p class="profile-role">{{ $user->role_label }} • {{ $user->program_studi }}</p>
             </div>
             @endif
 
@@ -137,9 +137,9 @@
                             <i class="bi bi-shield-check select-icon"></i>
                             <select class="form-select" id="inputRole" name="role" required>
                                 <option value="" disabled>-- Pilih Role --</option>
-                                <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Admin</option>
-                                <option value="dosen" {{ old('role', $user->role) == 'dosen' ? 'selected' : '' }}>Dosen</option>
-                                <option value="kaprodi" {{ old('role', $user->role) == 'kaprodi' ? 'selected' : '' }}>Kaprodi</option>
+                                <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Dosen</option>
+                                <option value="superadmin" {{ old('role', $user->role) == 'superadmin' ? 'selected' : '' }}>Kaprodi</option>
+                                <option value="masteradmin" {{ old('role', $user->role) == 'masteradmin' ? 'selected' : '' }}>Superuser</option>
                             </select>
                         </div>
                     </div>

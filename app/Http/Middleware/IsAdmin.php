@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use App\Models\User;
 use Auth;
 
 class IsAdmin
@@ -16,7 +17,7 @@ class IsAdmin
      */
     public function handle($request, Closure $next)
     {
-        if (Auth::user() &&  Auth::user()->role == 'admin') {
+        if (Auth::user() && User::normalizeRole(Auth::user()->role) === 'admin') {
              return $next($request);
         }
 

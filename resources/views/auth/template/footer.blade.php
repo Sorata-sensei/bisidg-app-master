@@ -15,11 +15,14 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Toggle password visibility
-        document.getElementById('togglePassword').addEventListener('click', function() {
+        // Toggle password visibility (aman untuk halaman non-login)
+        (function() {
+            const toggle = document.getElementById('togglePassword');
             const password = document.getElementById('password');
-            const icon = this;
+            if (!toggle || !password) return;
 
+            toggle.addEventListener('click', function() {
+            const icon = this;
             if (password.type === 'password') {
                 password.type = 'text';
                 icon.classList.remove('fa-eye');
@@ -30,16 +33,20 @@
                 icon.classList.add('fa-eye');
             }
         });
+        })();
 
         // Form submission with loading - Modified for Laravel
         function handleFormSubmit(formId) {
-            document.getElementById(formId).addEventListener('submit', function(e) {
+            const form = document.getElementById(formId);
+            if (!form) return;
+
+            form.addEventListener('submit', function() {
                 const button = this.querySelector('button[type="submit"]');
                 const overlay = document.getElementById('loadingOverlay');
 
                 // Show loading state
-                button.classList.add('loading');
-                overlay.classList.add('show');
+                if (button) button.classList.add('loading');
+                if (overlay) overlay.classList.add('show');
 
                 // Let the form submit normally to Laravel
                 // The loading will be hidden when page redirects/reloads
@@ -67,6 +74,8 @@
             const errorAlert = document.getElementById('errorAlert');
             const errorMessage = document.getElementById('errorMessage');
 
+            if (!errorAlert || !errorMessage) return;
+
             errorMessage.textContent = message;
             errorAlert.style.display = 'block';
 
@@ -91,6 +100,7 @@
         document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
             tab.addEventListener('shown.bs.tab', function(e) {
                 const targetPane = document.querySelector(this.getAttribute('data-bs-target'));
+                if (!targetPane) return;
                 targetPane.style.animation = 'fadeInUp 0.4s ease-out';
 
                 setTimeout(() => {

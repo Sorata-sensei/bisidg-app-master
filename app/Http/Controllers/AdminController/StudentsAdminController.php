@@ -38,6 +38,30 @@ class StudentsAdminController extends Controller
     }
 
     /**
+     * Management Index - List semua mahasiswa untuk superadmin/masteradmin
+     */
+    public function managementIndex(Request $request)
+    {
+        $search = $request->input('search');
+
+        $students = Student::with(['dosenPA'])
+            ->withCount('counselings')
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('nama_lengkap', 'like', "%{$search}%")
+                        ->orWhere('nim', 'like', "%{$search}%")
+                        ->orWhere('angkatan', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->paginate(15)
+            ->appends(['search' => $search]);
+
+        return view('admin.management.students.index', compact('students', 'search'));
+    }
+
+    /**
      * Show student counseling card by lecturer.
      */
     public function showCardByLecture($student_id)
@@ -111,6 +135,13 @@ class StudentsAdminController extends Controller
     public function create()
     {
         $menu = 'Add Student';
+        
+        // Tentukan view berdasarkan route
+        if (request()->routeIs('admin.management.students.*')) {
+            $lecturers = User::whereIn('role', ['admin', 'superadmin', 'masteradmin'])->orderBy('name', 'asc')->get();
+            return view('admin.management.students.create', compact('lecturers'));
+        }
+        
         return view('admin.students.create', compact('menu'));
     }
 
@@ -128,6 +159,7 @@ class StudentsAdminController extends Controller
             'notes'     => 'nullable|string|max:1000',
             'email'     => 'nullable|email|max:100|unique:students,email',
             'phone'     => 'nullable|string|max:15',
+            'id_lecturer' => 'nullable|exists:users,id',
         ], [
             'full_name.required' => 'Full name cannot be empty.',
             'nim.required'       => 'NIM cannot be empty.',
@@ -139,8 +171,13 @@ class StudentsAdminController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
+        // Tentukan id_lecturer berdasarkan route
+        $lecturerId = request()->routeIs('admin.management.students.*') 
+            ? ($request->id_lecturer ?? auth()->id())
+            : auth()->id();
+
         $studentData = [
-            'id_lecturer'      => auth()->id(),
+            'id_lecturer'      => $lecturerId,
             'nama_lengkap'     => $request->full_name,
             'nim'              => $request->nim,
             'angkatan'         => $request->batch,
@@ -156,6 +193,11 @@ class StudentsAdminController extends Controller
 
         Student::create($studentData);
 
+        // Redirect berdasarkan route yang dipanggil
+        if (request()->routeIs('admin.management.students.*')) {
+            return redirect()->route('admin.management.students.index')->with('success', 'Mahasiswa berhasil ditambahkan.');
+        }
+        
         return redirect()->route('admin.students.index')
             ->with('success', 'Mahasiswa berhasil ditambahkan.');
     }
@@ -195,6 +237,7 @@ class StudentsAdminController extends Controller
             'email'        => 'nullable|email|max:100|unique:students,email,' . $id,
             'no_telepon'   => 'nullable|string|max:15',
             'notes'        => 'nullable|string|max:1000',
+            'id_lecturer'  => 'nullable|exists:users,id',
         ]);
 
         if ($validator->fails()) {
@@ -206,7 +249,18 @@ class StudentsAdminController extends Controller
         $studentData = $validator->validated();
         $studentData['status_mahasiswa'] = 'Aktif';
 
+        // Update id_lecturer jika dari management route
+        if (request()->routeIs('admin.management.students.*') && isset($request->id_lecturer)) {
+            $studentData['id_lecturer'] = $request->id_lecturer;
+        }
+
         Student::where('id', $id)->update($studentData);
+
+        // Redirect berdasarkan route yang dipanggil
+        if (request()->routeIs('admin.management.students.*')) {
+            return redirect()->route('admin.management.students.index')
+                ->with('success', 'Data mahasiswa berhasil diperbarui!');
+        }
 
         return redirect()->back()
             ->with('success', 'Data mahasiswa berhasil diperbarui!');
@@ -307,6 +361,11 @@ class StudentsAdminController extends Controller
         $student = Student::findOrFail($id);
         $student->delete();
 
+        // Redirect berdasarkan route yang dipanggil
+        if (request()->routeIs('admin.management.students.*')) {
+            return redirect()->route('admin.management.students.index')->with('success', 'Mahasiswa berhasil dihapus!');
+        }
+        
         return redirect()->route('admin.students.index')
             ->with('success', 'Mahasiswa berhasil dihapus!');
     }

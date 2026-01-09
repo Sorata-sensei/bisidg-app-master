@@ -31,4 +31,51 @@ Route::middleware(['student'])->group(function () {
             Route::put('/achievement/update/{id}', 'updateAchievement')->name('achievement.update');
             Route::delete('/achievement/delete/{id}', 'deleteAchievement')->name('achievement.delete');
         });
+
+    // Final Project (Tugas Akhir)
+    Route::prefix('student/final-project')->name('student.final-project.')->group(function () {
+        // Dashboard
+        Route::get('/', [\App\Http\Controllers\Student\FinalProjectController::class, 'index'])->name('index');
+        
+        // Title Request
+        Route::prefix('title')->name('title.')->controller(\App\Http\Controllers\Student\TitleRequestController::class)->group(function () {
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/edit', 'edit')->name('edit');
+            Route::put('/', 'update')->name('update');
+        });
+        
+        // Proposal Registration
+        Route::prefix('proposal')->name('proposal.')->group(function () {
+            Route::get('/create', [\App\Http\Controllers\Student\ProposalRegistrationController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Student\ProposalRegistrationController::class, 'store'])->name('store');
+            Route::get('/{id}', [\App\Http\Controllers\Student\ProposalRegistrationController::class, 'show'])->name('show');
+        });
+
+        // Defense Registration
+        Route::prefix('defense')->name('defense.')->group(function () {
+            Route::get('/create', [\App\Http\Controllers\Student\DefenseRegistrationController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Student\DefenseRegistrationController::class, 'store'])->name('store');
+            Route::get('/{id}', [\App\Http\Controllers\Student\DefenseRegistrationController::class, 'show'])->name('show');
+        });
+
+        // Guidance Logs
+        Route::prefix('guidance')->name('guidance.')->controller(\App\Http\Controllers\Student\GuidanceLogController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('destroy');
+        });
+
+        // Documents
+        Route::prefix('documents')->name('documents.')->controller(\App\Http\Controllers\Student\DocumentController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{id}/download', 'download')->name('download');
+            Route::delete('/{id}', 'destroy')->name('destroy');
+        });
+    });
 });
