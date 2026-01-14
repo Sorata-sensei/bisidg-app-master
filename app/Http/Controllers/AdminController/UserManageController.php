@@ -36,8 +36,6 @@ class UserManageController extends Controller
     public function managementIndex(Request $request)
     {
         $search = $request->input('search');
-        
-        $search = $request->input('search');
         $programStudi = $request->input('program_studi');
 
         $lecturers = User::whereIn('role', ['admin', 'superadmin', 'masteradmin'])
@@ -173,7 +171,7 @@ class UserManageController extends Controller
                     'program_studi' => $prodi,
                     'role' => 'admin',
                 ]);
-                $u->password = bcrypt('password');
+                $u->password = bcrypt('12345678');
                 $u->save();
                 $created++;
             }
@@ -262,7 +260,7 @@ class UserManageController extends Controller
         $user = new User($request->only(['name', 'email', 'username', 'NIDNorNUPTK', 'role', 'program_studi']));
         $user->role = $request->role ?? 'admin';
         $user->program_studi = $request->program_studi ?? 'Bisnis Digital';
-        $user->password = bcrypt('password'); // password default
+        $user->password = bcrypt('12345678'); // password default
 
         $user->photo = $this->handleUpload($request, 'photo', null, 'users/photo');
         $user->ttd   = $this->handleUpload($request, 'ttd', null, 'users/ttd');

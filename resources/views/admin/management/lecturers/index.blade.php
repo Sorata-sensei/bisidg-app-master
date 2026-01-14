@@ -31,7 +31,7 @@
                     <a href="{{ route('admin.management.lecturers.template') }}" class="import-link">
                         Download template
                     </a>
-                    lalu upload CSV. Role otomatis: <b>admin (Dosen)</b>. Password default: <b>password</b>.
+                    lalu upload CSV. Role otomatis: <b>admin (Dosen)</b>. Password default: <b>12345678</b>.
                 </div>
             </div>
             <div class="import-right">

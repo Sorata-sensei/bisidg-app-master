@@ -369,7 +369,7 @@
                             style="font-size: 4rem; animation: pulse 1.2s infinite;"></i>
                         <p class="mb-1">Apakah Anda yakin ingin mereset password <br><strong
                                 id="resetStudentName"></strong>?</p>
-                        <small class="text-danger">Password baru akan menjadi <b>password</b></small>
+                        <small class="text-danger">Password baru akan menjadi <b>12345678</b></small>
                     </div>
                     <div class="modal-footer justify-content-center">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>

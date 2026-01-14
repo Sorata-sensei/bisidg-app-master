@@ -29,14 +29,14 @@ class MasterAdminSeeder extends Seeder
             'role' => 'masteradmin',
             'program_studi' => 'Bisnis Digital',
             'email_verified_at' => now(),
-            'password' => Hash::make('password'), // Password default
+            'password' => Hash::make('12345678'), // Password default
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
         $this->command->info('Masteradmin berhasil dibuat!');
         $this->command->info('Email: masteradmin@mail.com');
-        $this->command->info('Password: password');
+        $this->command->info('Password: 12345678');
     }
 }
 

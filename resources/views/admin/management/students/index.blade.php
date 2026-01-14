@@ -4,9 +4,19 @@
     <div class="content-card">
         <div class="card-header">
             <h3>Management Mahasiswa</h3>
-            <a href="{{ route('admin.management.students.create') }}" class="btn-primary">
-                <i class="bi bi-plus-circle"></i> Tambah Mahasiswa
-            </a>
+            <div class="header-actions">
+                <div class="toggle-all-wrapper">
+                    <label class="toggle-label">Toggle Semua:</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggleAllEdit" onchange="toggleAllStudents()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-status" id="toggleAllStatus">Kunci</span>
+                </div>
+                <a href="{{ route('admin.management.students.create') }}" class="btn-primary">
+                    <i class="bi bi-plus-circle"></i> Tambah Mahasiswa
+                </a>
+            </div>
         </div>
 
         @if(session('success'))
@@ -31,7 +41,7 @@
                     <a href="{{ route('admin.management.students.template') }}" class="import-link">
                         Download template
                     </a>
-                    lalu upload CSV. Password default: <b>NIM</b> (bcrypt). Kolom password boleh dikosongkan.
+                    lalu upload CSV. Password default: <b>12345678</b> (bcrypt). Kolom password boleh dikosongkan.
                 </div>
             </div>
             <div class="import-right">
@@ -75,6 +85,7 @@
                             <th>Dosen PA</th>
                             <th>Status</th>
                             <th>Counseling</th>
+                            <th>Edit Profil</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -102,6 +113,20 @@
                                 </td>
                                 <td>
                                     <span class="badge-count">{{ $student->counselings_count }}</span>
+                                </td>
+                                <td>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" 
+                                               class="toggle-edit" 
+                                               data-student-id="{{ $student->id }}"
+                                               data-student-name="{{ $student->nama_lengkap }}"
+                                               {{ $student->is_edited ? 'checked' : '' }}
+                                               onchange="toggleStudentEdit({{ $student->id }}, '{{ $student->nama_lengkap }}', this.checked)">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <span class="edit-status" id="status-{{ $student->id }}">
+                                        {{ $student->is_edited ? 'Edit' : 'Kunci' }}
+                                    </span>
                                 </td>
                                 <td>
                                     <div class="action-buttons">
@@ -610,6 +635,239 @@
         color: #999;
         font-size: 16px;
     }
+
+    /* Header Actions */
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .toggle-all-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 16px;
+        background: #F5F5F5;
+        border-radius: 10px;
+    }
+
+    .toggle-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-dark);
+        margin: 0;
+    }
+
+    .toggle-status {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-gray);
+        min-width: 50px;
+    }
+
+    /* Toggle Switch */
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 26px;
+        margin: 0;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.4s;
+        border-radius: 26px;
+    }
+
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 20px;
+        width: 20px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+        background-color: var(--primary-orange);
+    }
+
+    .toggle-switch input:checked + .toggle-slider:before {
+        transform: translateX(24px);
+    }
+
+    .toggle-switch input:focus + .toggle-slider {
+        box-shadow: 0 0 1px var(--primary-orange);
+    }
+
+    .toggle-switch input:disabled + .toggle-slider {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Edit Status */
+    .edit-status {
+        font-size: 12px;
+        font-weight: 600;
+        margin-left: 8px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        display: inline-block;
+    }
+
+    .edit-status:has(+ .toggle-switch input:checked),
+    .edit-status:has(~ .toggle-switch input:checked) {
+        color: #2E7D32;
+        background: #E8F5E9;
+    }
+
+    /* Table cell untuk toggle */
+    .data-table tbody td {
+        vertical-align: middle;
+    }
+
+    .data-table tbody td:has(.toggle-switch) {
+        text-align: center;
+    }
 </style>
 @endpush
 
+@push('scripts')
+<script>
+    // Toggle edit untuk satu mahasiswa
+    function toggleStudentEdit(studentId, studentName, isChecked) {
+        const statusEl = document.getElementById('status-' + studentId);
+        const toggleEl = event.target;
+        
+        // Disable toggle saat proses
+        toggleEl.disabled = true;
+        
+        fetch(`/admin/management/students/${studentId}/toggle-edit`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                is_edited: isChecked ? 1 : 0
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                statusEl.textContent = isChecked ? 'Edit' : 'Kunci';
+                statusEl.style.color = isChecked ? '#2E7D32' : '#666';
+                statusEl.style.background = isChecked ? '#E8F5E9' : '#F5F5F5';
+                
+                // Show toast notification
+                showToast('success', data.message);
+            } else {
+                // Revert toggle jika gagal
+                toggleEl.checked = !isChecked;
+                showToast('error', 'Gagal mengubah status edit profil.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            toggleEl.checked = !isChecked;
+            showToast('error', 'Terjadi kesalahan saat mengubah status.');
+        })
+        .finally(() => {
+            toggleEl.disabled = false;
+        });
+    }
+
+    // Toggle semua mahasiswa
+    function toggleAllStudents() {
+        const toggleAll = document.getElementById('toggleAllEdit');
+        const isChecked = toggleAll.checked;
+        const statusEl = document.getElementById('toggleAllStatus');
+        
+        // Disable toggle saat proses
+        toggleAll.disabled = true;
+        
+        fetch('/admin/management/students/toggle-all-edit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                is_edited: isChecked ? 1 : 0
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                statusEl.textContent = isChecked ? 'Edit' : 'Kunci';
+                
+                // Update semua toggle di table
+                document.querySelectorAll('.toggle-edit').forEach(toggle => {
+                    toggle.checked = isChecked;
+                });
+                
+                // Update semua status
+                document.querySelectorAll('.edit-status').forEach(status => {
+                    status.textContent = isChecked ? 'Edit' : 'Kunci';
+                    status.style.color = isChecked ? '#2E7D32' : '#666';
+                    status.style.background = isChecked ? '#E8F5E9' : '#F5F5F5';
+                });
+                
+                showToast('success', data.message);
+            } else {
+                toggleAll.checked = !isChecked;
+                showToast('error', 'Gagal mengubah status edit profil untuk semua mahasiswa.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            toggleAll.checked = !isChecked;
+            showToast('error', 'Terjadi kesalahan saat mengubah status.');
+        })
+        .finally(() => {
+            toggleAll.disabled = false;
+        });
+    }
+
+    // Toast notification
+    function showToast(type, message) {
+        const toast = document.createElement('div');
+        toast.className = `alert-${type}`;
+        toast.style.position = 'fixed';
+        toast.style.top = '20px';
+        toast.style.right = '20px';
+        toast.style.zIndex = '10000';
+        toast.style.minWidth = '300px';
+        toast.style.maxWidth = '500px';
+        toast.innerHTML = `
+            <i class="bi bi-${type === 'success' ? 'check-circle' : 'x-circle'}"></i>
+            <span>${message}</span>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.3s';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+</script>
+@endpush

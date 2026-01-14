@@ -135,6 +135,16 @@
             color: #999;
         }
 
+        .form-control.is-invalid {
+            border-color: #dc3545;
+            background: #fff5f5;
+        }
+
+        .form-control.is-invalid:focus {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+
         .form-label {
             font-weight: 600;
             color: var(--text-dark);
@@ -728,20 +738,33 @@
                                 </div>
                             </div>
 
-                            @if ($isDefaultPassword)
+                        </div>
+
+                        @if ($student->is_edited)
+                            <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label">
                                             <i class="bi bi-key me-1"></i>
                                             Password Baru
                                         </label>
-                                        <input type="password" name="password" class="form-control" 
-                                            @readonly(!$student->is_edited)
+                                        <input type="password" name="password" id="password" class="form-control" 
                                             minlength="8" placeholder="Minimal 8 karakter">
+                                        <small class="text-muted">Kosongkan jika tidak ingin mengubah password</small>
                                     </div>
                                 </div>
-                            @endif
-                        </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            <i class="bi bi-key-fill me-1"></i>
+                                            Konfirmasi Password
+                                        </label>
+                                        <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" 
+                                            minlength="8" placeholder="Ulangi password baru">
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
 
                         <div class="form-group">
                             <label class="form-label">
@@ -1039,6 +1062,48 @@
                 setTimeout(() => {
                     closeToast();
                 }, 5000);
+            }
+
+            // Password validation
+            const passwordInput = document.getElementById('password');
+            const passwordConfirmationInput = document.getElementById('password_confirmation');
+            
+            if (passwordInput && passwordConfirmationInput) {
+                function validatePassword() {
+                    const password = passwordInput.value;
+                    const passwordConfirmation = passwordConfirmationInput.value;
+                    
+                    if (password && passwordConfirmation) {
+                        if (password !== passwordConfirmation) {
+                            passwordConfirmationInput.setCustomValidity('Password tidak cocok');
+                            passwordConfirmationInput.classList.add('is-invalid');
+                        } else {
+                            passwordConfirmationInput.setCustomValidity('');
+                            passwordConfirmationInput.classList.remove('is-invalid');
+                        }
+                    } else if (passwordConfirmation && !password) {
+                        passwordConfirmationInput.setCustomValidity('Harap isi password baru terlebih dahulu');
+                        passwordConfirmationInput.classList.add('is-invalid');
+                    } else {
+                        passwordConfirmationInput.setCustomValidity('');
+                        passwordConfirmationInput.classList.remove('is-invalid');
+                    }
+                }
+
+                passwordInput.addEventListener('input', validatePassword);
+                passwordConfirmationInput.addEventListener('input', validatePassword);
+
+                // Validate on form submit
+                const form = passwordInput.closest('form');
+                if (form) {
+                    form.addEventListener('submit', function(e) {
+                        validatePassword();
+                        if (!form.checkValidity()) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }
+                    });
+                }
             }
         });
     </script>

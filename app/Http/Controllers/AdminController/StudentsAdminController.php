@@ -201,7 +201,7 @@ class StudentsAdminController extends Controller
                     continue;
                 }
 
-                $passwordToUse = $passwordPlain !== '' ? $passwordPlain : $nim;
+                $passwordToUse = $passwordPlain !== '' ? $passwordPlain : '12345678';
 
                 Student::create([
                     'id_lecturer' => $lecturerId,
@@ -358,6 +358,7 @@ class StudentsAdminController extends Controller
             'id_lecturer'      => $lecturerId,
             'nama_lengkap'     => $request->full_name,
             'nim'              => $request->nim,
+            'password'         => Hash::make('12345678'),
             'angkatan'         => $request->batch,
             'program_studi'    => $request->program_studi ?? 'Bisnis Digital',
             'email'            => $request->email,
@@ -526,10 +527,53 @@ class StudentsAdminController extends Controller
     public function resetpassword($id)
     {
         $student = Student::findOrFail($id);
-        $student->password = bcrypt('password');
+        $student->password = bcrypt('12345678');
         $student->save();
 
-        return redirect()->back()->with('success', "Password untuk {$student->nama_lengkap} telah direset ke 'password'.");
+        return redirect()->back()->with('success', "Password untuk {$student->nama_lengkap} telah direset ke '12345678'.");
+    }
+
+    /**
+     * Toggle is_edited untuk satu mahasiswa
+     */
+    public function toggleEdit(Request $request, $id)
+    {
+        $student = Student::findOrFail($id);
+        
+        // Jika request body ada is_edited, gunakan itu, jika tidak toggle
+        if ($request->has('is_edited')) {
+            $student->is_edited = $request->is_edited ? 1 : 0;
+        } else {
+            $student->is_edited = $student->is_edited ? 0 : 1;
+        }
+        
+        $student->save();
+
+        $status = $student->is_edited ? 'dibuka' : 'dikunci';
+        return response()->json([
+            'success' => true,
+            'message' => "Akses edit profil untuk {$student->nama_lengkap} telah {$status}.",
+            'is_edited' => $student->is_edited
+        ]);
+    }
+
+    /**
+     * Toggle is_edited untuk semua mahasiswa
+     */
+    public function toggleAllEdit(Request $request)
+    {
+        $request->validate([
+            'is_edited' => 'required|boolean'
+        ]);
+
+        $count = Student::query()->update(['is_edited' => $request->is_edited ? 1 : 0]);
+        $status = $request->is_edited ? 'dibuka' : 'dikunci';
+
+        return response()->json([
+            'success' => true,
+            'message' => "Akses edit profil untuk {$count} mahasiswa telah {$status}.",
+            'is_edited' => $request->is_edited ? 1 : 0
+        ]);
     }
     /**
      * Remove a student.

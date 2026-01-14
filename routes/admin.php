@@ -41,6 +41,8 @@ Route::middleware(['auth', 'role:superadmin,masteradmin'])->group(function () {
         Route::put('/{id}', 'update')->name('update');
         Route::delete('/{id}', 'destroy')->name('destroy');
         Route::get('/{id}/reset-password', 'resetpassword')->name('reset-password');
+        Route::post('/{id}/toggle-edit', 'toggleEdit')->name('toggle-edit');
+        Route::post('/toggle-all-edit', 'toggleAllEdit')->name('toggle-all-edit');
     });
 
     // Management Menu (Full CRUD untuk superadmin/masteradmin)

@@ -53,8 +53,8 @@
 
                 <div class="form-group">
                     <label>Password</label>
-                    <input type="password" name="password" class="form-control" placeholder="Kosongkan untuk password default: password">
-                    <small>Jika dikosongkan, password default adalah: password</small>
+                    <input type="password" name="password" class="form-control" placeholder="Kosongkan untuk password default: 12345678">
+                    <small>Jika dikosongkan, password default adalah: 12345678</small>
                     @error('password')<span class="error">{{ $message }}</span>@enderror
                 </div>
 

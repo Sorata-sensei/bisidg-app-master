@@ -114,7 +114,7 @@ class StudentsController extends Controller
     public function editDataIndex(Request $request)
     {
         $student = Student::with(['dosenPA', 'achievements'])->findOrFail(decrypt(session('student_id')));
-        $isDefaultPassword = \Hash::check('password', $student->password);
+        $isDefaultPassword = \Hash::check('12345678', $student->password);
         return view('students.personal.edit', compact('student', 'isDefaultPassword'));
     }
 
@@ -127,7 +127,8 @@ class StudentsController extends Controller
         'nama_orangtua'        => 'nullable|string|max:255',
         'jenis_kelamin'        => 'nullable|in:L,P',
         'tanggal_lahir'        => 'nullable|date',
-        'password'             => 'nullable|string|min:8|max:20',
+        'password'             => 'nullable|string|min:8|max:20|confirmed',
+        'password_confirmation' => 'nullable|string|min:8|max:20',
         'alamat'               => 'nullable|string',
         'alamat_lat'           => 'nullable|numeric',
         'alamat_lng'           => 'nullable|numeric',
@@ -148,6 +149,7 @@ class StudentsController extends Controller
 
         'password.min'         => 'Password must be at least 8 characters.',
         'password.max'         => 'Password cannot be longer than 20 characters.',
+        'password.confirmed'   => 'Password dan konfirmasi password tidak cocok.',
 
         'alamat.string'        => 'Address must be text.',
         'alamat_lat.numeric'   => 'Latitude must be a number.',
