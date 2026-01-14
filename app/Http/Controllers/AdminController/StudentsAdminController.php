@@ -44,6 +44,7 @@ class StudentsAdminController extends Controller
     public function managementIndex(Request $request)
     {
         $search = $request->input('search');
+        $programStudi = $request->input('program_studi');
 
         $students = Student::with(['dosenPA'])
             ->withCount('counselings')
@@ -55,11 +56,14 @@ class StudentsAdminController extends Controller
                         ->orWhere('email', 'like', "%{$search}%");
                 });
             })
+            ->when($programStudi, function ($query, $programStudi) {
+                $query->where('program_studi', $programStudi);
+            })
             ->latest()
             ->paginate(15)
-            ->appends(['search' => $search]);
+            ->appends(['search' => $search, 'program_studi' => $programStudi]);
 
-        return view('admin.management.students.index', compact('students', 'search'));
+        return view('admin.management.students.index', compact('students', 'search', 'programStudi'));
     }
 
     /**
@@ -325,6 +329,7 @@ class StudentsAdminController extends Controller
             'full_name' => 'required|string|max:100',
             'nim'       => 'required|string|unique:students,nim|max:12',
             'batch'     => 'required|integer|min:1900|max:2100',
+            'program_studi' => 'required|string|in:Bisnis Digital,Ilmu Komputer',
             'gender'    => 'nullable|in:L,P',
             'address'   => 'nullable|string|max:500',
             'notes'     => 'nullable|string|max:1000',
@@ -336,6 +341,8 @@ class StudentsAdminController extends Controller
             'nim.required'       => 'NIM cannot be empty.',
             'nim.unique'         => 'This NIM is already registered, please use another one.',
             'batch.required'     => 'Batch cannot be empty.',
+            'program_studi.required' => 'Program Studi harus dipilih.',
+            'program_studi.in'    => 'Program Studi tidak valid.',
         ]);
 
         if ($validator->fails()) {
@@ -352,7 +359,7 @@ class StudentsAdminController extends Controller
             'nama_lengkap'     => $request->full_name,
             'nim'              => $request->nim,
             'angkatan'         => $request->batch,
-            'program_studi'    => 'Bisnis Digital',
+            'program_studi'    => $request->program_studi ?? 'Bisnis Digital',
             'email'            => $request->email,
             'no_telepon'       => $request->phone,
             'notes'            => $request->notes,

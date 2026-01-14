@@ -72,10 +72,13 @@
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card shadow-sm border-0">
-                    <div class="card-header bg-info text-white">
+                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">
                             <i class="fas fa-user-plus me-2"></i> Tambah Mahasiswa Baru
                         </h5>
+                        <a href="{{ route('admin.students.index') }}" class="btn btn-light btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i> Kembali
+                        </a>
                     </div>
                     <div class="card-body">
                         <form action="{{ route('admin.students.store') }}" method="POST">

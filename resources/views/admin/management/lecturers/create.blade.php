@@ -32,7 +32,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Program Studi *</label>
-                        <input type="text" name="program_studi" class="form-control" value="{{ old('program_studi', 'Bisnis Digital') }}" required>
+                        <select name="program_studi" class="form-control" required>
+                            <option value="">-- Pilih Program Studi --</option>
+                            <option value="Bisnis Digital" {{ old('program_studi', 'Bisnis Digital') == 'Bisnis Digital' ? 'selected' : '' }}>Bisnis Digital</option>
+                            <option value="Ilmu Komputer" {{ old('program_studi') == 'Ilmu Komputer' ? 'selected' : '' }}>Ilmu Komputer</option>
+                        </select>
                         @error('program_studi')<span class="error">{{ $message }}</span>@enderror
                     </div>
 

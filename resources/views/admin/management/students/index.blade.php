@@ -45,12 +45,17 @@
             </div>
         </div>
 
-        <!-- Search -->
+        <!-- Search & Filter -->
         <div class="search-box">
-            <form method="GET" action="{{ route('admin.management.students.index') }}">
+            <form method="GET" action="{{ route('admin.management.students.index') }}" class="search-form">
                 <input type="text" name="search" class="search-input" 
                        placeholder="Cari nama, NIM, email, atau angkatan..." 
                        value="{{ $search }}">
+                <select name="program_studi" class="filter-select">
+                    <option value="">Semua Program Studi</option>
+                    <option value="Bisnis Digital" {{ $programStudi == 'Bisnis Digital' ? 'selected' : '' }}>Bisnis Digital</option>
+                    <option value="Ilmu Komputer" {{ $programStudi == 'Ilmu Komputer' ? 'selected' : '' }}>Ilmu Komputer</option>
+                </select>
                 <button type="submit" class="search-btn">
                     <i class="bi bi-search"></i>
                 </button>
@@ -66,6 +71,7 @@
                             <th>Nama</th>
                             <th>NIM</th>
                             <th>Angkatan</th>
+                            <th>Program Studi</th>
                             <th>Dosen PA</th>
                             <th>Status</th>
                             <th>Counseling</th>
@@ -82,6 +88,9 @@
                                 <td class="font-monospace">{{ $student->nim }}</td>
                                 <td>
                                     <span class="badge-year">{{ $student->angkatan }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge-prodi">{{ $student->program_studi }}</span>
                                 </td>
                                 <td>
                                     {{ $student->dosenPA->name ?? '-' }}
@@ -121,7 +130,7 @@
             </div>
 
             <div class="pagination-wrapper">
-                {{ $students->links() }}
+                {{ $students->appends(['search' => $search, 'program_studi' => $programStudi])->links('pagination::bootstrap-5') }}
             </div>
         @else
             <div class="empty-state">
@@ -263,12 +272,17 @@
 
     .search-box {
         margin-bottom: 20px;
+    }
+
+    .search-form {
         display: flex;
         gap: 10px;
+        flex-wrap: wrap;
     }
 
     .search-input {
         flex: 1;
+        min-width: 200px;
         padding: 12px 15px;
         border: 2px solid #E0E0E0;
         border-radius: 10px;
@@ -276,6 +290,21 @@
     }
 
     .search-input:focus {
+        outline: none;
+        border-color: var(--primary-orange);
+    }
+
+    .filter-select {
+        padding: 12px 15px;
+        border: 2px solid #E0E0E0;
+        border-radius: 10px;
+        font-size: 14px;
+        background: white;
+        min-width: 180px;
+        cursor: pointer;
+    }
+
+    .filter-select:focus {
         outline: none;
         border-color: var(--primary-orange);
     }
@@ -288,6 +317,7 @@
         border-radius: 10px;
         cursor: pointer;
         font-size: 16px;
+        white-space: nowrap;
     }
 
     .data-table {
@@ -322,6 +352,15 @@
     .badge-year {
         background: #E8F5E9;
         color: #2E7D32;
+        padding: 5px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .badge-prodi {
+        background: #E3F2FD;
+        color: #1976D2;
         padding: 5px 12px;
         border-radius: 12px;
         font-size: 12px;
@@ -421,7 +460,139 @@
     }
 
     .pagination-wrapper {
-        margin-top: 20px;
+        margin-top: 30px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Custom Pagination Styling - Aggressive Override */
+    .pagination-wrapper .pagination {
+        display: flex !important;
+        list-style: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        gap: 8px !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        align-items: center !important;
+        border: none !important;
+        background: transparent !important;
+    }
+
+    .pagination-wrapper .pagination .page-item {
+        margin: 0 !important;
+        list-style: none !important;
+        display: inline-block !important;
+    }
+
+    .pagination-wrapper .pagination .page-link {
+        padding: 10px 16px !important;
+        border: 2px solid #E0E0E0 !important;
+        border-radius: 10px !important;
+        color: #666 !important;
+        text-decoration: none !important;
+        background: white !important;
+        transition: all 0.3s !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        min-width: 44px !important;
+        text-align: center !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        line-height: 1.5 !important;
+        position: relative !important;
+        margin: 0 !important;
+        margin-left: 0 !important;
+    }
+
+    .pagination-wrapper .pagination .page-link:hover {
+        background: var(--primary-orange) !important;
+        color: white !important;
+        border-color: var(--primary-orange) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3) !important;
+        z-index: 1 !important;
+    }
+
+    .pagination-wrapper .pagination .page-item.active .page-link {
+        background: var(--primary-orange) !important;
+        color: white !important;
+        border-color: var(--primary-orange) !important;
+        font-weight: 600 !important;
+        z-index: 2 !important;
+    }
+
+    .pagination-wrapper .pagination .page-item.disabled .page-link {
+        background: #F5F5F5 !important;
+        color: #999 !important;
+        border-color: #E0E0E0 !important;
+        cursor: not-allowed !important;
+        opacity: 0.6 !important;
+        pointer-events: none !important;
+    }
+
+    .pagination-wrapper .pagination .page-item.disabled .page-link:hover {
+        background: #F5F5F5 !important;
+        color: #999 !important;
+        border-color: #E0E0E0 !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Remove all pseudo-elements and icons */
+    .pagination-wrapper .pagination .page-link::before,
+    .pagination-wrapper .pagination .page-link::after {
+        display: none !important;
+        content: none !important;
+    }
+
+    /* Remove any SVG or icon content */
+    .pagination-wrapper .pagination .page-link svg,
+    .pagination-wrapper .pagination .page-link i {
+        display: none !important;
+    }
+
+    /* Fix first and last child */
+    .pagination-wrapper .pagination .page-item:first-child .page-link {
+        margin-left: 0 !important;
+        border-top-left-radius: 10px !important;
+        border-bottom-left-radius: 10px !important;
+        font-size: 14px !important;
+    }
+
+    .pagination-wrapper .pagination .page-item:last-child .page-link {
+        margin-right: 0 !important;
+        border-top-right-radius: 10px !important;
+        border-bottom-right-radius: 10px !important;
+        font-size: 14px !important;
+    }
+
+    /* Hide any span or text that might contain chevrons */
+    .pagination-wrapper .pagination .page-link span {
+        display: inline !important;
+        font-size: 14px !important;
+    }
+
+    /* Ensure no large arrows */
+    .pagination-wrapper .pagination .page-link[aria-label*="Previous"],
+    .pagination-wrapper .pagination .page-link[aria-label*="Next"] {
+        font-size: 14px !important;
+        padding: 10px 16px !important;
+    }
+
+    /* Fix any overflow */
+    .pagination-wrapper {
+        overflow: visible !important;
+        width: 100% !important;
+        position: relative !important;
+    }
+
+    .pagination-wrapper .pagination {
+        max-width: 100% !important;
+        overflow: visible !important;
+        position: relative !important;
     }
 
     .empty-state {

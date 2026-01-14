@@ -37,6 +37,18 @@
                     </div>
 
                     <div class="form-group">
+                        <label>Program Studi *</label>
+                        <select name="program_studi" class="form-control" required>
+                            <option value="">-- Pilih Program Studi --</option>
+                            <option value="Bisnis Digital" {{ old('program_studi') == 'Bisnis Digital' ? 'selected' : '' }}>Bisnis Digital</option>
+                            <option value="Ilmu Komputer" {{ old('program_studi') == 'Ilmu Komputer' ? 'selected' : '' }}>Ilmu Komputer</option>
+                        </select>
+                        @error('program_studi')<span class="error">{{ $message }}</span>@enderror
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
                         <label>Dosen PA *</label>
                         <select name="id_lecturer" class="form-control" required>
                             <option value="">Pilih Dosen PA</option>
@@ -48,9 +60,7 @@
                         </select>
                         @error('id_lecturer')<span class="error">{{ $message }}</span>@enderror
                     </div>
-                </div>
 
-                <div class="form-row">
                     <div class="form-group">
                         <label>Jenis Kelamin</label>
                         <select name="gender" class="form-control">

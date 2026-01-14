@@ -37,6 +37,9 @@ class UserManageController extends Controller
     {
         $search = $request->input('search');
         
+        $search = $request->input('search');
+        $programStudi = $request->input('program_studi');
+
         $lecturers = User::whereIn('role', ['admin', 'superadmin', 'masteradmin'])
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
@@ -45,11 +48,14 @@ class UserManageController extends Controller
                       ->orWhere('program_studi', 'like', "%{$search}%");
                 });
             })
+            ->when($programStudi, function ($query, $programStudi) {
+                $query->where('program_studi', $programStudi);
+            })
             ->orderBy('name', 'asc')
             ->paginate(15)
-            ->appends(['search' => $search]);
+            ->appends(['search' => $search, 'program_studi' => $programStudi]);
 
-        return view('admin.management.lecturers.index', compact('lecturers', 'search'));
+        return view('admin.management.lecturers.index', compact('lecturers', 'search', 'programStudi'));
     }
 
     /**
@@ -309,7 +315,7 @@ class UserManageController extends Controller
             'name'          => 'required|string|max:255',
             'email'         => 'required|email|unique:users,email,' . ($id ?? 'NULL') . ',id',
             'username'      => 'nullable|string|unique:users,username,' . ($id ?? 'NULL') . ',id',
-            'program_studi' => 'required|string|max:50',
+            'program_studi' => 'required|string|in:Bisnis Digital,Ilmu Komputer',
             'role'          => 'required|string|in:admin,superadmin,masteradmin',
             'password'      => 'nullable|string|min:8',
             'photo'         => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
