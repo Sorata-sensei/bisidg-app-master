@@ -26,6 +26,7 @@ Route::middleware(['auth', 'role:superadmin,masteradmin'])->group(function () {
         Route::post('/import', 'import')->name('import');
         Route::get('/{id}/edit', 'edit')->name('edit');
         Route::put('/{id}', 'update')->name('update');
+        Route::get('/{id}/reset-password', 'resetPassword')->name('reset-password');
         Route::delete('/{id}', 'destroy')->name('destroy');
     });
 

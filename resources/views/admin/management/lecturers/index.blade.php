@@ -110,6 +110,11 @@
                                             <i class="bi bi-pencil"></i> Edit
                                         </a>
                                         @if($lecturer->id !== auth()->id())
+                                        <a href="{{ route('admin.management.lecturers.reset-password', $lecturer->id) }}"
+                                           class="btn-reset"
+                                           onclick="return confirm('Yakin ingin mereset password dosen ini ke 12345678?')">
+                                            <i class="bi bi-arrow-counterclockwise"></i> Reset Password
+                                        </a>
                                         <form action="{{ route('admin.management.lecturers.destroy', $lecturer->id) }}" 
                                               method="POST" 
                                               onsubmit="return confirm('Yakin ingin menghapus dosen ini?')"
@@ -452,6 +457,24 @@
         transform: translateY(-2px);
     }
 
+    .btn-reset {
+        padding: 6px 12px;
+        background: #FFC107;
+        color: #212121;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 12px;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .btn-reset:hover {
+        background: #FFB300;
+        transform: translateY(-2px);
+    }
+
     .pagination-wrapper {
         margin-top: 30px;
         display: flex;
@@ -604,5 +627,35 @@
         font-size: 16px;
     }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+    // Popup toast sederhana untuk pesan sukses (misalnya reset password)
+    @if(session('success'))
+    window.addEventListener('load', function () {
+        const toast = document.createElement('div');
+        toast.className = 'alert-success';
+        toast.style.position = 'fixed';
+        toast.style.top = '20px';
+        toast.style.right = '20px';
+        toast.style.zIndex = '10000';
+        toast.style.minWidth = '300px';
+        toast.style.maxWidth = '500px';
+        toast.innerHTML = `
+            <i class="bi bi-check-circle"></i>
+            <span>{{ session('success') }}</span>
+        `;
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.3s';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    });
+    @endif
+</script>
 @endpush
 

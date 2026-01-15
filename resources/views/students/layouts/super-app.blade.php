@@ -530,10 +530,10 @@
             </button>
 
             <!-- Logo Section (Desktop Only) -->
-            <div class="logo-section desktop-only">
+            <a href="{{ route('student.dashboard') }}" class="logo-section desktop-only" style="transform: translateX(50px);text-decoration: none;">
                 <img src="{{ asset('ush.png') }}" alt="USH Logo" class="header-logo">
                 <h4 class="app-title">Universitas Sugeng Hartono</h4>
-            </div>
+            </a>
             
             <!-- User Info -->
             <div class="user-info">

@@ -136,6 +136,11 @@
                                         <a href="{{ route('admin.management.students.edit', $student->id) }}" class="btn-edit">
                                             <i class="bi bi-pencil"></i> Edit
                                         </a>
+                                        <a href="{{ route('admin.management.students.reset-password', $student->id) }}"
+                                           class="btn-reset"
+                                           onclick="return confirm('Yakin ingin mereset password mahasiswa ini ke 12345678?')">
+                                            <i class="bi bi-arrow-counterclockwise"></i> Reset Password
+                                        </a>
                                         <form action="{{ route('admin.management.students.destroy', $student->id) }}" 
                                               method="POST" 
                                               onsubmit="return confirm('Yakin ingin menghapus mahasiswa ini?')"
@@ -484,6 +489,24 @@
         transform: translateY(-2px);
     }
 
+    .btn-reset {
+        padding: 6px 12px;
+        background: #FFC107;
+        color: #212121;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 12px;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .btn-reset:hover {
+        background: #FFB300;
+        transform: translateY(-2px);
+    }
+
     .pagination-wrapper {
         margin-top: 30px;
         display: flex;
@@ -751,6 +774,13 @@
 
 @push('scripts')
 <script>
+    // Tampilkan toast saat ada pesan sukses dari server (misalnya reset password)
+    @if(session('success'))
+    window.addEventListener('load', function () {
+        showToast('success', @json(session('success')));
+    });
+    @endif
+
     // Toggle edit untuk satu mahasiswa
     function toggleStudentEdit(studentId, studentName, isChecked) {
         const statusEl = document.getElementById('status-' + studentId);

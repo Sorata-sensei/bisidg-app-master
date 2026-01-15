@@ -195,6 +195,27 @@ class UserManageController extends Controller
     }
 
     /**
+     * Reset password dosen ke default.
+     */
+    public function resetPassword($id)
+    {
+        $user = User::findOrFail($id);
+
+        // Jangan reset password akun yang sedang login
+        if ($user->id === Auth::id()) {
+            return redirect()->back()->with('error', 'Tidak dapat mereset password akun yang sedang digunakan.');
+        }
+
+        $user->password = bcrypt('12345678');
+        $user->save();
+
+        return redirect()->back()->with(
+            'success',
+            "Password untuk {$user->name} berhasil direset ke '12345678'."
+        );
+    }
+
+    /**
      * Destroy user
      */
     public function destroy($id)
