@@ -242,6 +242,18 @@
             .title-main { font-size: 1.45rem; }
             .landing-card { padding: 1.5rem; }
             .topbar { grid-template-columns: 1fr; gap: .75rem; }
+
+            /* Mobile-safe layout:
+               - hilangkan transform/scale dari inline style
+               - beri ruang ekstra di bawah agar konten tidak tertutup navbar/browser UI
+            */
+            .landing-wrap {
+                transform: none !important;
+                scale: 1 !important;
+                max-height: none !important;
+                padding-top: 1.75rem;
+                padding-bottom: 5.5rem;
+            }
         }
     </style>
 

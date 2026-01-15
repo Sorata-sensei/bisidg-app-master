@@ -492,6 +492,8 @@
 
             .container {
                 margin-top: 0;
+                /* ruang ekstra agar konten tidak tertutup bottom-nav */
+                padding-bottom: 5.5rem;
             }
         }
 
