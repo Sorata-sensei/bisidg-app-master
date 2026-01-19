@@ -63,8 +63,11 @@
                        value="{{ $search }}">
                 <select name="program_studi" class="filter-select">
                     <option value="">Semua Program Studi</option>
-                    <option value="Bisnis Digital" {{ $programStudi == 'Bisnis Digital' ? 'selected' : '' }}>Bisnis Digital</option>
-                    <option value="Ilmu Komputer" {{ $programStudi == 'Ilmu Komputer' ? 'selected' : '' }}>Ilmu Komputer</option>
+                    @foreach($studyPrograms as $prodi)
+                        <option value="{{ $prodi->name }}" {{ $programStudi == $prodi->name ? 'selected' : '' }}>
+                            {{ $prodi->name }}
+                        </option>
+                    @endforeach
                 </select>
                 <button type="submit" class="search-btn">
                     <i class="bi bi-search"></i>

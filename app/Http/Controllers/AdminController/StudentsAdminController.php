@@ -4,6 +4,7 @@ namespace App\Http\Controllers\AdminController;
 
 use Illuminate\Http\Request;
 use App\Models\Student;
+use App\Models\StudyProgram;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -45,6 +46,7 @@ class StudentsAdminController extends Controller
     {
         $search = $request->input('search');
         $programStudi = $request->input('program_studi');
+        $studyPrograms = StudyProgram::where('is_active', true)->orderBy('order')->get();
 
         $students = Student::with(['dosenPA'])
             ->withCount('counselings')
@@ -63,7 +65,7 @@ class StudentsAdminController extends Controller
             ->paginate(15)
             ->appends(['search' => $search, 'program_studi' => $programStudi]);
 
-        return view('admin.management.students.index', compact('students', 'search', 'programStudi'));
+        return view('admin.management.students.index', compact('students', 'search', 'programStudi', 'studyPrograms'));
     }
 
     /**
@@ -310,14 +312,15 @@ class StudentsAdminController extends Controller
     public function create()
     {
         $menu = 'Add Student';
+        $studyPrograms = StudyProgram::where('is_active', true)->orderBy('order')->get();
         
         // Tentukan view berdasarkan route
         if (request()->routeIs('admin.management.students.*')) {
             $lecturers = User::whereIn('role', ['admin', 'superadmin', 'masteradmin'])->orderBy('name', 'asc')->get();
-            return view('admin.management.students.create', compact('lecturers'));
+            return view('admin.management.students.create', compact('lecturers', 'studyPrograms'));
         }
         
-        return view('admin.students.create', compact('menu'));
+        return view('admin.students.create', compact('menu', 'studyPrograms'));
     }
 
     /**
@@ -325,11 +328,13 @@ class StudentsAdminController extends Controller
      */
     public function store(Request $request)
     {
+        $validPrograms = StudyProgram::where('is_active', true)->pluck('name')->toArray();
+        
         $validator = Validator::make($request->all(), [
             'full_name' => 'required|string|max:100',
             'nim'       => 'required|string|unique:students,nim|max:12',
             'batch'     => 'required|integer|min:1900|max:2100',
-            'program_studi' => 'required|string|in:Bisnis Digital,Ilmu Komputer',
+            'program_studi' => 'required|string|in:' . implode(',', $validPrograms),
             'gender'    => 'nullable|in:L,P',
             'address'   => 'nullable|string|max:500',
             'notes'     => 'nullable|string|max:1000',
@@ -350,17 +355,20 @@ class StudentsAdminController extends Controller
         }
 
         // Tentukan id_lecturer berdasarkan route
-        $lecturerId = request()->routeIs('admin.management.students.*') 
+        $lecturerId = request()->routeIs('admin.management.students.*')
             ? ($request->id_lecturer ?? auth()->id())
             : auth()->id();
 
+        // Default program studi dari master
+        $defaultProdi = StudyProgram::where('is_active', true)->orderBy('order')->first();
+        
         $studentData = [
             'id_lecturer'      => $lecturerId,
             'nama_lengkap'     => $request->full_name,
             'nim'              => $request->nim,
             'password'         => Hash::make('12345678'),
             'angkatan'         => $request->batch,
-            'program_studi'    => $request->program_studi ?? 'Bisnis Digital',
+            'program_studi'    => $request->program_studi ?? ($defaultProdi ? $defaultProdi->name : 'Bisnis Digital'),
             'email'            => $request->email,
             'no_telepon'       => $request->phone,
             'notes'            => $request->notes,
@@ -396,8 +404,15 @@ class StudentsAdminController extends Controller
     {
         $student = Student::findOrFail($id);
         $menu = 'Edit ' . $student->nama_lengkap;
+        $studyPrograms = StudyProgram::where('is_active', true)->orderBy('order')->get();
 
-        return view('admin.students.edit', compact('student', 'menu'));
+        // Tentukan view berdasarkan route
+        if (request()->routeIs('admin.management.students.*')) {
+            $lecturers = User::whereIn('role', ['admin', 'superadmin', 'masteradmin'])->orderBy('name', 'asc')->get();
+            return view('admin.management.students.edit', compact('student', 'menu', 'studyPrograms', 'lecturers'));
+        }
+
+        return view('admin.students.edit', compact('student', 'menu', 'studyPrograms'));
     }
 
     /**
@@ -523,7 +538,7 @@ class StudentsAdminController extends Controller
     }
     /**
      * Reset a student's password to default.
-     */    
+     */
     public function resetpassword($id)
     {
         $student = Student::findOrFail($id);

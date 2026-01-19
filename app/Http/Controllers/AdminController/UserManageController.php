@@ -4,6 +4,7 @@ namespace App\Http\Controllers\AdminController;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\StudyProgram;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Crypt;
@@ -18,7 +19,8 @@ class UserManageController extends Controller
     public function index()
     {
         $user = Auth::user();
-        return view('admin.user.index', compact('user'));
+        $studyPrograms = StudyProgram::where('is_active', true)->orderBy('order')->get();
+        return view('admin.user.index', compact('user', 'studyPrograms'));
     }
 
     /**
@@ -37,6 +39,7 @@ class UserManageController extends Controller
     {
         $search = $request->input('search');
         $programStudi = $request->input('program_studi');
+        $studyPrograms = StudyProgram::where('is_active', true)->orderBy('order')->get();
 
         $lecturers = User::whereIn('role', ['admin', 'superadmin', 'masteradmin'])
             ->when($search, function ($query, $search) {
@@ -53,7 +56,7 @@ class UserManageController extends Controller
             ->paginate(15)
             ->appends(['search' => $search, 'program_studi' => $programStudi]);
 
-        return view('admin.management.lecturers.index', compact('lecturers', 'search', 'programStudi'));
+        return view('admin.management.lecturers.index', compact('lecturers', 'search', 'programStudi', 'studyPrograms'));
     }
 
     /**
@@ -247,13 +250,14 @@ class UserManageController extends Controller
     public function create()
     {
         $user = new User();
+        $studyPrograms = StudyProgram::where('is_active', true)->orderBy('order')->get();
         
         // Tentukan view berdasarkan route
         if (request()->routeIs('admin.management.lecturers.*')) {
-            return view('admin.management.lecturers.create', compact('user'));
+            return view('admin.management.lecturers.create', compact('user', 'studyPrograms'));
         }
         
-        return view('admin.user.create', compact('user'));
+        return view('admin.user.create', compact('user', 'studyPrograms'));
     }
 
     /**
@@ -262,13 +266,14 @@ class UserManageController extends Controller
     public function edit($id)
     {
         $user = User::findOrFail($id);
+        $studyPrograms = StudyProgram::where('is_active', true)->orderBy('order')->get();
         
         // Tentukan view berdasarkan route
         if (request()->routeIs('admin.management.lecturers.*')) {
-            return view('admin.management.lecturers.edit', compact('user'));
+            return view('admin.management.lecturers.edit', compact('user', 'studyPrograms'));
         }
         
-        return view('admin.user.edit', compact('user'));
+        return view('admin.user.edit', compact('user', 'studyPrograms'));
     }
 
     /**
@@ -280,7 +285,10 @@ class UserManageController extends Controller
 
         $user = new User($request->only(['name', 'email', 'username', 'NIDNorNUPTK', 'role', 'program_studi']));
         $user->role = $request->role ?? 'admin';
-        $user->program_studi = $request->program_studi ?? 'Bisnis Digital';
+        
+        // Default program studi dari master
+        $defaultProdi = StudyProgram::where('is_active', true)->orderBy('order')->first();
+        $user->program_studi = $request->program_studi ?? ($defaultProdi ? $defaultProdi->name : 'Bisnis Digital');
         $user->password = bcrypt('12345678'); // password default
 
         $user->photo = $this->handleUpload($request, 'photo', null, 'users/photo');
@@ -330,11 +338,13 @@ class UserManageController extends Controller
      */
     private function rules($id = null): array
     {
+        $validPrograms = StudyProgram::where('is_active', true)->pluck('name')->toArray();
+        
         return [
             'name'          => 'required|string|max:255',
             'email'         => 'required|email|unique:users,email,' . ($id ?? 'NULL') . ',id',
             'username'      => 'nullable|string|unique:users,username,' . ($id ?? 'NULL') . ',id',
-            'program_studi' => 'required|string|in:Bisnis Digital,Ilmu Komputer',
+            'program_studi' => 'required|string|in:' . implode(',', $validPrograms),
             'role'          => 'required|string|in:admin,superadmin,masteradmin',
             'password'      => 'nullable|string|min:8',
             'photo'         => 'nullable|image|mimes:jpeg,png,jpg|max:2048',

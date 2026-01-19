@@ -122,8 +122,11 @@
                             <i class="bi bi-mortarboard select-icon"></i>
                             <select class="form-select" id="inputProgramStudi" name="program_studi" required>
                                 <option value="" disabled>-- Pilih Program Studi --</option>
-                                <option value="Bisnis Digital" {{ old('program_studi', $user->program_studi) == 'Bisnis Digital' ? 'selected' : '' }}>Bisnis Digital</option>
-                                <option value="Ilmu Komputer" {{ old('program_studi', $user->program_studi) == 'Ilmu Komputer' ? 'selected' : '' }}>Ilmu Komputer</option>
+                                @foreach($studyPrograms as $prodi)
+                                    <option value="{{ $prodi->name }}" {{ old('program_studi', $user->program_studi) == $prodi->name ? 'selected' : '' }}>
+                                        {{ $prodi->name }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
                     </div>

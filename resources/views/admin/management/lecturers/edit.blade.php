@@ -33,7 +33,14 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Program Studi *</label>
-                        <input type="text" name="program_studi" class="form-control" value="{{ old('program_studi', $user->program_studi) }}" required>
+                        <select name="program_studi" class="form-control" required>
+                            <option value="">-- Pilih Program Studi --</option>
+                            @foreach($studyPrograms as $prodi)
+                                <option value="{{ $prodi->name }}" {{ old('program_studi', $user->program_studi) == $prodi->name ? 'selected' : '' }}>
+                                    {{ $prodi->name }}
+                                </option>
+                            @endforeach
+                        </select>
                         @error('program_studi')<span class="error">{{ $message }}</span>@enderror
                     </div>
 
