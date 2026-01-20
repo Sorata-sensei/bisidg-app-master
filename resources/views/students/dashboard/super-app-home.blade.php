@@ -4,36 +4,37 @@
     <!-- Upcoming Schedule Reminder -->
     @if(($upcomingSchedules ?? collect())->isNotEmpty())
         @foreach($upcomingSchedules as $schedule)
-            <div class="schedule-reminder {{ $schedule['type'] === 'Sidang' ? 'reminder-danger' : 'reminder-purple' }}">
-                <div class="reminder-icon">
-                    <i class="bi bi-calendar-event"></i>
+            <div class="schedule-reminder">
+                <div class="reminder-badge-small {{ $schedule['type'] === 'Sidang' ? 'badge-red' : 'badge-blue' }}">
+                    {{ $schedule['type'] }}
                 </div>
                 <div class="reminder-content">
-                    <div class="reminder-header">
-                        <h4>{{ $schedule['type_label'] }} Mendatang</h4>
-                        <span class="reminder-badge">{{ $schedule['type'] }}</span>
-                    </div>
-                    <div class="reminder-details">
-                        <div class="reminder-time">
-                            <i class="bi bi-clock"></i>
+                    <h4 class="reminder-title-main">{{ $schedule['type_label'] }} Mendatang</h4>
+                    
+                    <div class="reminder-info-row">
+                        <i class="bi bi-calendar3"></i>
+                        <div>
                             <strong>{{ $schedule['datetime']->translatedFormat('l, d F Y') }}</strong>
-                            <span>pukul {{ $schedule['datetime']->translatedFormat('H:i') }} WIB</span>
+                            <span class="reminder-time-text">pukul {{ $schedule['datetime']->translatedFormat('H:i') }} WIB</span>
                         </div>
-                        @if(!empty($schedule['title']))
-                            <div class="reminder-title">
-                                <i class="bi bi-file-text"></i>
-                                <span>{{ $schedule['title'] }}</span>
-                            </div>
-                        @endif
-                        @if(!empty($schedule['approval_notes']))
-                            <div class="reminder-notes">
-                                <i class="bi bi-chat-left-text"></i>
-                                <span><strong>Catatan Kaprodi:</strong> {{ $schedule['approval_notes'] }}</span>
-                            </div>
-                        @endif
                     </div>
+
+                    @if(!empty($schedule['title']))
+                        <div class="reminder-info-row">
+                            <i class="bi bi-file-earmark-text"></i>
+                            <div class="reminder-text">{{ $schedule['title'] }}</div>
+                        </div>
+                    @endif
+
+                    @if(!empty($schedule['approval_notes']))
+                        <div class="reminder-info-box">
+                            <div class="reminder-info-label">Catatan Kaprodi</div>
+                            <div class="reminder-info-value">{{ $schedule['approval_notes'] }}</div>
+                        </div>
+                    @endif
+
                     <a href="{{ $schedule['url'] }}" class="reminder-link">
-                        Lihat Detail <i class="bi bi-arrow-right"></i>
+                        Lihat Detail
                     </a>
                 </div>
             </div>
@@ -179,206 +180,130 @@
 
 @push('css')
 <style>
-    /* Schedule Reminder */
+    /* Schedule Reminder - Natural Design */
     .schedule-reminder {
-        background: white;
-        border-radius: 20px;
-        padding: 20px;
-        box-shadow: var(--shadow);
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 24px;
         margin-bottom: 25px;
-        display: flex;
-        gap: 20px;
-        border-left: 5px solid;
-        animation: slideIn 0.5s ease-out;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
         position: relative;
-        overflow: hidden;
     }
 
-    .schedule-reminder::before {
-        content: '';
+    .reminder-badge-small {
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
-        animation: shimmer 2s infinite;
+        top: 20px;
+        right: 20px;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
     }
 
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    .badge-blue {
+        background: #eff6ff;
+        color: #2563eb;
     }
 
-    @keyframes shimmer {
-        0% { transform: translateX(-100%); }
-        100% { transform: translateX(100%); }
-    }
-
-    .reminder-purple {
-        border-left-color: #6A1B9A;
-        background: linear-gradient(135deg, rgba(156, 39, 176, 0.05), rgba(156, 39, 176, 0.02));
-    }
-
-    .reminder-danger {
-        border-left-color: #C62828;
-        background: linear-gradient(135deg, rgba(244, 67, 54, 0.05), rgba(244, 67, 54, 0.02));
-    }
-
-    .reminder-icon {
-        width: 60px;
-        height: 60px;
-        border-radius: 15px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 28px;
-        color: white;
-        flex-shrink: 0;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-    }
-
-    .reminder-purple .reminder-icon {
-        background: linear-gradient(135deg, #6A1B9A, #9C27B0);
-    }
-
-    .reminder-danger .reminder-icon {
-        background: linear-gradient(135deg, #C62828, #E53935);
+    .badge-red {
+        background: #fef2f2;
+        color: #dc2626;
     }
 
     .reminder-content {
-        flex: 1;
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 16px;
     }
 
-    .reminder-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        flex-wrap: wrap;
-    }
-
-    .reminder-header h4 {
-        font-size: 18px;
-        font-weight: 700;
-        color: var(--text-dark);
+    .reminder-title-main {
+        font-size: 20px;
+        font-weight: 600;
+        color: #111827;
         margin: 0;
+        padding-right: 80px;
     }
 
-    .reminder-badge {
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 800;
-        white-space: nowrap;
-    }
-
-    .reminder-purple .reminder-badge {
-        background: rgba(156, 39, 176, 0.15);
-        color: #6A1B9A;
-        border: 1px solid rgba(156, 39, 176, 0.2);
-    }
-
-    .reminder-danger .reminder-badge {
-        background: rgba(244, 67, 54, 0.15);
-        color: #C62828;
-        border: 1px solid rgba(244, 67, 54, 0.2);
-    }
-
-    .reminder-details {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .reminder-time,
-    .reminder-title,
-    .reminder-notes {
+    .reminder-info-row {
         display: flex;
         align-items: flex-start;
-        gap: 10px;
+        gap: 12px;
         font-size: 14px;
-        color: #555;
-        line-height: 1.5;
+        color: #374151;
     }
 
-    .reminder-time i,
-    .reminder-title i,
-    .reminder-notes i {
-        color: var(--primary-orange);
-        font-size: 16px;
+    .reminder-info-row i {
+        color: #6b7280;
+        font-size: 18px;
         margin-top: 2px;
         flex-shrink: 0;
     }
 
-    .reminder-time strong {
-        color: var(--text-dark);
-        font-weight: 700;
-        margin-right: 8px;
-    }
-
-    .reminder-time span {
-        color: #777;
-    }
-
-    .reminder-title span {
+    .reminder-info-row strong {
+        display: block;
+        color: #111827;
         font-weight: 600;
-        color: #444;
+        margin-bottom: 2px;
     }
 
-    .reminder-notes {
-        padding: 10px;
-        background: rgba(0, 0, 0, 0.03);
-        border-radius: 10px;
-        border-left: 3px solid var(--primary-orange);
+    .reminder-time-text {
+        color: #6b7280;
+        font-size: 13px;
     }
 
-    .reminder-notes span {
-        color: #666;
+    .reminder-text {
+        color: #374151;
+        line-height: 1.6;
+        font-size: 14px;
     }
 
-    .reminder-notes strong {
-        color: #444;
-        font-weight: 700;
+    .reminder-info-box {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-top: 4px;
+    }
+
+    .reminder-info-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+    }
+
+    .reminder-info-value {
+        font-size: 14px;
+        color: #374151;
+        line-height: 1.5;
     }
 
     .reminder-link {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        justify-content: center;
         padding: 10px 20px;
-        background: linear-gradient(135deg, var(--primary-orange), #FFB347);
-        color: white;
+        background: #f3f4f6;
+        color: #374151;
         text-decoration: none;
-        border-radius: 12px;
+        border-radius: 8px;
         font-size: 14px;
-        font-weight: 600;
-        transition: var(--transition-normal);
+        font-weight: 500;
+        transition: all 0.2s;
+        border: 1px solid #e5e7eb;
         align-self: flex-start;
-        box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+        margin-top: 4px;
     }
 
     .reminder-link:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
-        color: white;
-    }
-
-    .reminder-link i {
-        transition: transform 0.3s;
-    }
-
-    .reminder-link:hover i {
-        transform: translateX(4px);
+        background: #e5e7eb;
+        color: #111827;
+        border-color: #d1d5db;
     }
 
     /* Stats Card */
