@@ -32,7 +32,7 @@
                 </div>
                 <div class="form-group">
                     <label for="semester">Semester</label>
-                    <input id="semester" type="text" class="form-control" value="{{ now()->year - auth()->guard('student')->user()->angkatan + 1 }}" disabled>
+                    <input id="semester" type="text" class="form-control" value="{{ auth()->guard('student')->user()->getCurrentSemester() }}" disabled>
                 </div>
             </div>
         </div>

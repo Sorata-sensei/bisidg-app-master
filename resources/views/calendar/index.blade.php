@@ -106,11 +106,23 @@
                         <div class="upcoming-list">
                             @foreach($upcomingEvents as $e)
                                 <div class="upcoming-item">
-                                    <div class="up-left">
-                                        <span class="event-chip {{ $e['type'] === 'Sidang' ? 'chip-danger' : 'chip-purple' }}">{{ $e['type'] }}</span>
-                                        <div class="up-title">{{ $e['student_name'] }}</div>
+                                    <div class="up-content">
+                                        <div class="up-header">
+                                            <div class="up-left">
+                                                <span class="event-chip {{ $e['type'] === 'Sidang' ? 'chip-danger' : 'chip-purple' }}">{{ $e['type'] }}</span>
+                                                <div class="up-title">{{ $e['student_name'] }}</div>
+                                            </div>
+                                            <div class="up-time">{{ $e['datetime']->translatedFormat('d M Y H:i') }}</div>
+                                        </div>
+                                        @if(!empty($e['project_title'] ?? ''))
+                                            <div class="up-project-title">{{ $e['project_title'] }}</div>
+                                        @endif
+                                        @if(!empty($e['approval_notes'] ?? ''))
+                                            <div class="up-notes">
+                                                <strong>Catatan Kaprodi:</strong> {{ $e['approval_notes'] }}
+                                            </div>
+                                        @endif
                                     </div>
-                                    <div class="up-time">{{ $e['datetime']->translatedFormat('d M Y H:i') }}</div>
                                 </div>
                             @endforeach
                         </div>
@@ -134,8 +146,8 @@
                                     <th>Tanggal</th>
                                     <th>Jenis</th>
                                     <th>Mahasiswa</th>
-                                    <th>NIM</th>
-                                    <th>Prodi</th>
+                                    <th>Judul TA</th>
+                                    <th>Catatan Kaprodi</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -148,9 +160,24 @@
                                                 {{ $e['type'] }}
                                             </span>
                                         </td>
-                                        <td>{{ $e['student_name'] }}</td>
-                                        <td>{{ $e['nim'] }}</td>
-                                        <td>{{ $e['prodi'] }}</td>
+                                        <td>
+                                            <div style="font-weight: 600;">{{ $e['student_name'] }}</div>
+                                            <div style="font-size: 11px; color: #999;">{{ $e['nim'] }} • {{ $e['prodi'] }}</div>
+                                        </td>
+                                        <td>
+                                            @if(!empty($e['project_title'] ?? ''))
+                                                <div style="font-size: 12px; line-height: 1.4;">{{ $e['project_title'] }}</div>
+                                            @else
+                                                <span class="muted">-</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if(!empty($e['approval_notes'] ?? ''))
+                                                <div style="font-size: 12px; line-height: 1.4; color: #666;">{{ $e['approval_notes'] }}</div>
+                                            @else
+                                                <span class="muted">-</span>
+                                            @endif
+                                        </td>
                                         <td>
                                             <span class="status-badge {{ $e['status'] === 'approved' ? 'active' : 'warning' }}">
                                                 {{ ucfirst($e['status']) }}
@@ -393,14 +420,23 @@
     }
 
     .upcoming-item {
+        padding: 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(0,0,0,0.06);
+        background: #fff;
+    }
+
+    .up-content {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .up-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        padding: 10px 12px;
-        border-radius: 14px;
-        border: 1px solid rgba(0,0,0,0.06);
-        background: #fff;
     }
 
     .up-left {
@@ -408,6 +444,7 @@
         align-items: center;
         gap: 10px;
         min-width: 0;
+        flex: 1;
     }
 
     .up-title {
@@ -425,6 +462,31 @@
         color: #666;
         font-size: 12px;
         white-space: nowrap;
+    }
+
+    .up-project-title {
+        font-size: 12px;
+        color: #555;
+        font-weight: 600;
+        line-height: 1.4;
+        margin-top: 4px;
+    }
+
+    .up-notes {
+        font-size: 11px;
+        color: #666;
+        line-height: 1.4;
+        padding: 8px;
+        background: rgba(0,0,0,0.02);
+        border-radius: 8px;
+        border-left: 3px solid var(--primary-orange);
+        margin-top: 4px;
+    }
+
+    .up-notes strong {
+        color: #444;
+        display: block;
+        margin-bottom: 4px;
     }
 
     .data-table {

@@ -47,6 +47,8 @@ class CalendarController extends Controller
                 'student_name' => data_get($p, 'finalProject.student.nama_lengkap') ?? 'Mahasiswa',
                 'nim' => data_get($p, 'finalProject.student.nim') ?? '-',
                 'prodi' => data_get($p, 'finalProject.student.program_studi') ?? '-',
+                'project_title' => data_get($p, 'finalProject.title') ?? '',
+                'approval_notes' => $p->approval_notes ?? '',
             ]);
         }
 
@@ -59,6 +61,8 @@ class CalendarController extends Controller
                 'student_name' => data_get($d, 'finalProject.student.nama_lengkap') ?? 'Mahasiswa',
                 'nim' => data_get($d, 'finalProject.student.nim') ?? '-',
                 'prodi' => data_get($d, 'finalProject.student.program_studi') ?? '-',
+                'project_title' => data_get($d, 'finalProject.title') ?? '',
+                'approval_notes' => $d->approval_notes ?? '',
             ]);
         }
 

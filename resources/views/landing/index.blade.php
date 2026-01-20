@@ -157,20 +157,33 @@
                             @if(($upcomingEvents?->count() ?? 0) > 0)
                                 <div class="mt-2" style="display:flex; flex-direction:column; gap:10px;">
                                     @foreach($upcomingEvents as $e)
-                                        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding: 10px 12px; border-radius: 14px; border: 1px solid rgba(0,0,0,0.06); background: #fff;">
-                                            <div style="display:flex; align-items:center; gap:10px; min-width:0;">
-                                                <span style="font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 999px; border: 1px solid rgba(0,0,0,0.06);
-                                                    background: {{ $e['type'] === 'Sidang' ? 'rgba(244,67,54,0.10)' : 'rgba(156,39,176,0.10)' }};
-                                                    color: {{ $e['type'] === 'Sidang' ? '#C62828' : '#6A1B9A' }};">
-                                                    {{ $e['type'] }}
-                                                </span>
-                                                <div style="font-weight: 800; color:#333; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                                                    {{ $e['title'] }}
+                                        <div style="padding: 12px; border-radius: 14px; border: 1px solid rgba(0,0,0,0.06); background: #fff;">
+                                            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom: 8px;">
+                                                <div style="display:flex; align-items:center; gap:10px; min-width:0; flex:1;">
+                                                    <span style="font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 999px; border: 1px solid rgba(0,0,0,0.06);
+                                                        background: {{ $e['type'] === 'Sidang' ? 'rgba(244,67,54,0.10)' : 'rgba(156,39,176,0.10)' }};
+                                                        color: {{ $e['type'] === 'Sidang' ? '#C62828' : '#6A1B9A' }};
+                                                        white-space:nowrap;">
+                                                        {{ $e['type'] }}
+                                                    </span>
+                                                    <div style="font-weight: 800; color:#333; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1;">
+                                                        {{ $e['title'] }}
+                                                    </div>
+                                                </div>
+                                                <div class="text-muted" style="font-size: 12px; font-weight: 700; white-space:nowrap;">
+                                                    {{ $e['datetime']->translatedFormat('d M Y H:i') }}
                                                 </div>
                                             </div>
-                                            <div class="text-muted" style="font-size: 12px; font-weight: 700; white-space:nowrap;">
-                                                {{ $e['datetime']->translatedFormat('d M Y H:i') }}
-                                            </div>
+                                            @if(!empty($e['project_title'] ?? ''))
+                                                <div style="font-size: 13px; color:#555; font-weight: 600; margin-bottom: 6px; line-height: 1.4;">
+                                                    {{ $e['project_title'] }}
+                                                </div>
+                                            @endif
+                                            @if(!empty($e['approval_notes'] ?? ''))
+                                                <div style="font-size: 12px; color:#666; line-height: 1.4; padding: 8px; background: rgba(0,0,0,0.02); border-radius: 8px; border-left: 3px solid {{ $e['type'] === 'Sidang' ? '#C62828' : '#6A1B9A' }};">
+                                                    <strong style="color:#444;">Catatan Kaprodi:</strong> {{ $e['approval_notes'] }}
+                                                </div>
+                                            @endif
                                         </div>
                                     @endforeach
                                 </div>

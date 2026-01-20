@@ -1,6 +1,45 @@
 @extends('students.layouts.super-app')
 
 @section('content')
+    <!-- Upcoming Schedule Reminder -->
+    @if(($upcomingSchedules ?? collect())->isNotEmpty())
+        @foreach($upcomingSchedules as $schedule)
+            <div class="schedule-reminder {{ $schedule['type'] === 'Sidang' ? 'reminder-danger' : 'reminder-purple' }}">
+                <div class="reminder-icon">
+                    <i class="bi bi-calendar-event"></i>
+                </div>
+                <div class="reminder-content">
+                    <div class="reminder-header">
+                        <h4>{{ $schedule['type_label'] }} Mendatang</h4>
+                        <span class="reminder-badge">{{ $schedule['type'] }}</span>
+                    </div>
+                    <div class="reminder-details">
+                        <div class="reminder-time">
+                            <i class="bi bi-clock"></i>
+                            <strong>{{ $schedule['datetime']->translatedFormat('l, d F Y') }}</strong>
+                            <span>pukul {{ $schedule['datetime']->translatedFormat('H:i') }} WIB</span>
+                        </div>
+                        @if(!empty($schedule['title']))
+                            <div class="reminder-title">
+                                <i class="bi bi-file-text"></i>
+                                <span>{{ $schedule['title'] }}</span>
+                            </div>
+                        @endif
+                        @if(!empty($schedule['approval_notes']))
+                            <div class="reminder-notes">
+                                <i class="bi bi-chat-left-text"></i>
+                                <span><strong>Catatan Kaprodi:</strong> {{ $schedule['approval_notes'] }}</span>
+                            </div>
+                        @endif
+                    </div>
+                    <a href="{{ $schedule['url'] }}" class="reminder-link">
+                        Lihat Detail <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        @endforeach
+    @endif
+
     <!-- Quick Stats Card -->
     <div class="stats-card">
         <div class="stats-header">
@@ -140,6 +179,208 @@
 
 @push('css')
 <style>
+    /* Schedule Reminder */
+    .schedule-reminder {
+        background: white;
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: var(--shadow);
+        margin-bottom: 25px;
+        display: flex;
+        gap: 20px;
+        border-left: 5px solid;
+        animation: slideIn 0.5s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .schedule-reminder::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+        animation: shimmer 2s infinite;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    .reminder-purple {
+        border-left-color: #6A1B9A;
+        background: linear-gradient(135deg, rgba(156, 39, 176, 0.05), rgba(156, 39, 176, 0.02));
+    }
+
+    .reminder-danger {
+        border-left-color: #C62828;
+        background: linear-gradient(135deg, rgba(244, 67, 54, 0.05), rgba(244, 67, 54, 0.02));
+    }
+
+    .reminder-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: white;
+        flex-shrink: 0;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .reminder-purple .reminder-icon {
+        background: linear-gradient(135deg, #6A1B9A, #9C27B0);
+    }
+
+    .reminder-danger .reminder-icon {
+        background: linear-gradient(135deg, #C62828, #E53935);
+    }
+
+    .reminder-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .reminder-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .reminder-header h4 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0;
+    }
+
+    .reminder-badge {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .reminder-purple .reminder-badge {
+        background: rgba(156, 39, 176, 0.15);
+        color: #6A1B9A;
+        border: 1px solid rgba(156, 39, 176, 0.2);
+    }
+
+    .reminder-danger .reminder-badge {
+        background: rgba(244, 67, 54, 0.15);
+        color: #C62828;
+        border: 1px solid rgba(244, 67, 54, 0.2);
+    }
+
+    .reminder-details {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .reminder-time,
+    .reminder-title,
+    .reminder-notes {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 14px;
+        color: #555;
+        line-height: 1.5;
+    }
+
+    .reminder-time i,
+    .reminder-title i,
+    .reminder-notes i {
+        color: var(--primary-orange);
+        font-size: 16px;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
+    .reminder-time strong {
+        color: var(--text-dark);
+        font-weight: 700;
+        margin-right: 8px;
+    }
+
+    .reminder-time span {
+        color: #777;
+    }
+
+    .reminder-title span {
+        font-weight: 600;
+        color: #444;
+    }
+
+    .reminder-notes {
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.03);
+        border-radius: 10px;
+        border-left: 3px solid var(--primary-orange);
+    }
+
+    .reminder-notes span {
+        color: #666;
+    }
+
+    .reminder-notes strong {
+        color: #444;
+        font-weight: 700;
+    }
+
+    .reminder-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        background: linear-gradient(135deg, var(--primary-orange), #FFB347);
+        color: white;
+        text-decoration: none;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        transition: var(--transition-normal);
+        align-self: flex-start;
+        box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+    }
+
+    .reminder-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
+        color: white;
+    }
+
+    .reminder-link i {
+        transition: transform 0.3s;
+    }
+
+    .reminder-link:hover i {
+        transform: translateX(4px);
+    }
+
     /* Stats Card */
     .stats-card {
         background: white;

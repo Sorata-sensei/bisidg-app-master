@@ -107,8 +107,51 @@ class StudentsController extends Controller
             ->orderByDesc('published_at')
             ->limit(3)
             ->get();
+
+        // Ambil jadwal sempro/sidang yang sudah disetujui dan belum berlalu
+        $studentId = decrypt(session('student_id'));
+        $upcomingSchedules = collect();
+
+        $finalProject = \App\Models\FinalProject::with(['proposal', 'defense'])
+            ->where('student_id', $studentId)
+            ->first();
         
-        return view('students.dashboard.super-app-home', compact('student', 'counseling', 'menus', 'announcements'));
+        if ($finalProject) {
+            // Cek proposal yang sudah disetujui dan jadwalnya belum berlalu
+            if ($finalProject->proposal && $finalProject->proposal->status === 'approved' && $finalProject->proposal->scheduled_at) {
+                $scheduledAt = \Carbon\Carbon::parse($finalProject->proposal->scheduled_at);
+                if ($scheduledAt->greaterThanOrEqualTo(now()->startOfMinute())) {
+                    $upcomingSchedules->push([
+                        'type' => 'Sempro',
+                        'type_label' => 'Seminar Proposal',
+                        'datetime' => $scheduledAt,
+                        'title' => $finalProject->title ?? '',
+                        'approval_notes' => $finalProject->proposal->approval_notes ?? '',
+                        'url' => route('student.final-project.proposal.show', $finalProject->proposal->id),
+                    ]);
+                }
+            }
+
+            // Cek defense yang sudah disetujui dan jadwalnya belum berlalu
+            if ($finalProject->defense && $finalProject->defense->status === 'approved' && $finalProject->defense->scheduled_at) {
+                $scheduledAt = \Carbon\Carbon::parse($finalProject->defense->scheduled_at);
+                if ($scheduledAt->greaterThanOrEqualTo(now()->startOfMinute())) {
+                    $upcomingSchedules->push([
+                        'type' => 'Sidang',
+                        'type_label' => 'Sidang Skripsi',
+                        'datetime' => $scheduledAt,
+                        'title' => $finalProject->title ?? '',
+                        'approval_notes' => $finalProject->defense->approval_notes ?? '',
+                        'url' => route('student.final-project.defense.show', $finalProject->defense->id),
+                    ]);
+                }
+            }
+        }
+
+        // Urutkan berdasarkan tanggal terdekat
+        $upcomingSchedules = $upcomingSchedules->sortBy('datetime')->values();
+        
+        return view('students.dashboard.super-app-home', compact('student', 'counseling', 'menus', 'announcements', 'upcomingSchedules'));
     }
 
     public function editDataIndex(Request $request)
